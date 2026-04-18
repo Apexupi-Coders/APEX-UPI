@@ -1,3 +1,4 @@
+Remove-Item-Recurse-Force"services\transaction-orchestrator"
 package com.pspswitch.orchestrator.service;
 
 import com.pspswitch.orchestrator.model.PreprocessingContext;
