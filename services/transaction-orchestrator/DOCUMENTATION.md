@@ -14,7 +14,6 @@ A production-grade Spring Boot Transaction Orchestrator for a UPI PSP Switch. Im
 | **Redis 7** | Idempotency cache (atomic SETNX) | 6379 |
 | **Apache Kafka** | Event-driven consumption from Ingress Service | 9092 |
 | **Spring Boot 3.2** | Application runtime (Java 17) | 8080 |
-
 ```bash
 # Start everything
 cd "d:\Transaction orc"
