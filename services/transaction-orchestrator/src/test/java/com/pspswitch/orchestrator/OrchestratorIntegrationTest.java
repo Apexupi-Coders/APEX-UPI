@@ -68,6 +68,7 @@ class OrchestratorIntegrationTest {
         Map<String, Object> req = new LinkedHashMap<>();
         req.put("tid", "TID-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         req.put("tr", tr);
+        req.put("payerVpa", "payer@bank");
         req.put("pa", "merchant@yesbank");
         req.put("pn", "Fresh Mart");
         req.put("mc", "5411");

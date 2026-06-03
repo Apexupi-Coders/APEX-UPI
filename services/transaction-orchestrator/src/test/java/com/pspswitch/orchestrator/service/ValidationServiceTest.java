@@ -24,6 +24,7 @@ class ValidationServiceTest {
     private UpiPaymentRequest validRequest() {
         UpiPaymentRequest req = new UpiPaymentRequest();
         req.setTr("ORD-001");
+        req.setPayerVpa("payer@bank");
         req.setPa("merchant@yesbank");
         req.setPn("Fresh Mart");
         req.setMc("5411");
