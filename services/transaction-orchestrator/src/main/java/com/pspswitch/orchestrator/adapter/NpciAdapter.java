@@ -1,7 +1,8 @@
 package com.pspswitch.orchestrator.adapter;
 
-import com.pspswitch.orchestrator.controller.WebhookController;
+import com.pspswitch.orchestrator.service.NpciCallbackHandler;
 import com.pspswitch.orchestrator.model.NpciCallbackPayload;
+import com.pspswitch.orchestrator.model.NpciInboundResponseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -36,7 +37,7 @@ public class NpciAdapter {
     private static final Logger log = LoggerFactory.getLogger(NpciAdapter.class);
     private static final Random RANDOM = new Random();
 
-    private final WebhookController webhookController;
+    private final NpciCallbackHandler npciCallbackHandler;
 
     /** Thread-safe toggle for demo failure simulation */
     private volatile boolean failureMode = false;
@@ -44,8 +45,8 @@ public class NpciAdapter {
     /** Toggle to suppress webhook entirely (for timeout testing) */
     private volatile boolean suppressWebhook = false;
 
-    public NpciAdapter(@Lazy WebhookController webhookController) {
-        this.webhookController = webhookController;
+    public NpciAdapter(@Lazy NpciCallbackHandler npciCallbackHandler) {
+        this.npciCallbackHandler = npciCallbackHandler;
     }
 
     /**
@@ -91,19 +92,24 @@ public class NpciAdapter {
             return;
         }
 
-        NpciCallbackPayload payload;
+        NpciInboundResponseEvent event = new NpciInboundResponseEvent();
+        event.setTxnId(tid);
+        event.setType("PAY");
 
         if (failureMode) {
             // Simulate NPCI rejection (wrong PIN, blocked account, etc.)
-            payload = new NpciCallbackPayload(tid, "ZM", null, "FAILED");
+            event.setResult("FAILURE");
+            event.setErrCode("ZM");
         } else {
             // Simulate NPCI success with approval reference number
             String arn = "ARN-" + String.format("%06d", RANDOM.nextInt(999999));
-            payload = new NpciCallbackPayload(tid, "00", arn, "SUCCESS");
+            event.setResult("SUCCESS");
+            event.setMsgId(arn);
+            event.setErrCode("00");
         }
 
-        // Call our own webhook endpoint (simulates NPCI POST to /api/v1/webhook/npci)
-        webhookController.handleNpciCallback(payload);
+        // Call our own webhook internally
+        npciCallbackHandler.handleNpciResponse(event);
     }
 
     /**

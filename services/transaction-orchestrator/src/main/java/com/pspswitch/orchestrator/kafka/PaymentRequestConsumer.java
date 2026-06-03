@@ -1,5 +1,6 @@
 package com.pspswitch.orchestrator.kafka;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pspswitch.orchestrator.model.UpiPaymentRequest;
 import com.pspswitch.orchestrator.orchestrator.TransactionOrchestrator;
@@ -47,10 +48,38 @@ public class PaymentRequestConsumer {
         try {
             log.info("[KAFKA_CONSUMER] Received message from topic | length={}", message.length());
 
-            UpiPaymentRequest request = objectMapper.readValue(message, UpiPaymentRequest.class);
+            JsonNode rootNode = objectMapper.readTree(message);
+            
+            // Map flat TPAP JSON to Orchestrator UpiPaymentRequest
+            UpiPaymentRequest request = new UpiPaymentRequest();
+            request.setTr(rootNode.has("txnId") ? rootNode.get("txnId").asText() : java.util.UUID.randomUUID().toString());
+            request.setPayerVpa(rootNode.has("payerVpa") ? rootNode.get("payerVpa").asText() : "unknown@upi");
+            request.setPa(rootNode.has("payeeVpa") ? rootNode.get("payeeVpa").asText() : null);
+            request.setPn(rootNode.has("payeeName") ? rootNode.get("payeeName").asText() : "Payee");
+            request.setMc(rootNode.has("mcc") ? rootNode.get("mcc").asText() : "0000");
+            if (rootNode.has("amount")) {
+                request.setAm(new java.math.BigDecimal(rootNode.get("amount").asText()));
+            }
+            request.setCu(rootNode.has("currency") ? rootNode.get("currency").asText() : "INR");
 
-            log.info("[KAFKA_CONSUMER] Deserialized | tr={} | pa={} | am={} | mode={}",
-                    request.getTr(), request.getPa(), request.getAm(), request.getMode());
+            // Map txnType to UPI mode code:
+            // PEER_TO_PEER → mode 04 (P2P, no merchant IDs needed)
+            // MERCHANT_PAYMENT → mode 16 (QR merchant, requires mid/msid/mtid)
+            String txnType = rootNode.has("txnType") ? rootNode.get("txnType").asText() : "PEER_TO_PEER";
+            if ("MERCHANT_PAYMENT".equals(txnType)) {
+                request.setMode("16");
+                request.setMid(rootNode.has("mid") ? rootNode.get("mid").asText() : "MERCHANT-001");
+                request.setMsid(rootNode.has("msid") ? rootNode.get("msid").asText() : "STORE-001");
+                request.setMtid(rootNode.has("mtid") ? rootNode.get("mtid").asText() : "TERM-001");
+            } else {
+                request.setMode("04"); // P2P — no merchant IDs required
+            }
+
+            request.setFlowDirection("SEND");
+            request.setSignatureVerified(true);
+
+            log.info("[KAFKA_CONSUMER] Deserialized and Mapped | tr={} | payerVpa={} | pa={} | am={} | mode={} | txnType={}",
+                    request.getTr(), request.getPayerVpa(), request.getPa(), request.getAm(), request.getMode(), txnType);
 
             // Feed into the same orchestrator pipeline as REST
             TransactionOrchestrator.OrchestratorResult result = orchestrator.orchestrate(request);

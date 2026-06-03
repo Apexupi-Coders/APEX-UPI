@@ -187,6 +187,19 @@ public class ControlController {
         infra.put("cryptoEnabled", dataCryptoService.isCryptoEnabled());
         status.put("infrastructure", infra);
 
+        // Transactions list
+        java.util.List<Map<String, Object>> dashboardTxns = stateService.getAllTransactions().stream().map(ctx -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("txnId", ctx.getTid());
+            map.put("payerVpa", ctx.getPayerVpa() != null ? ctx.getPayerVpa() : "unknown@upi");
+            map.put("payeeVpa", ctx.getPa());
+            map.put("amount", ctx.getAm());
+            map.put("status", ctx.getState() != null ? ctx.getState().name() : "UNKNOWN");
+            map.put("timestamp", ctx.getUpdatedAt());
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+        status.put("transactions", dashboardTxns);
+
         return ResponseEntity.ok(status);
     }
 }

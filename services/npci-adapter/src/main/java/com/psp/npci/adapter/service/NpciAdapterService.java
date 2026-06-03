@@ -106,7 +106,13 @@ public class NpciAdapterService {
                     new HttpEntity<>(xml, buildHeaders(signature)), String.class);
 
             log.info("[NPCI-ADAPTER] Ack received from NPCI | txnId={} | ack={}", txnId, response.getBody());
-            log.info("[NPCI-ADAPTER] Waiting for RespPay callback | txnId={}", txnId);
+            
+            if (response.getBody() != null && response.getBody().contains("<RespPay>")) {
+                log.info("[NPCI-ADAPTER] Auto-processing RespPay from mock synchronous response | txnId={}", txnId);
+                processRespPayAsync(txnId, response.getBody(), signature);
+            } else {
+                log.info("[NPCI-ADAPTER] Waiting for RespPay callback | txnId={}", txnId);
+            }
 
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             log.error("[NPCI-ADAPTER] NPCI HTTP error on ReqPay | txnId={} | status={}",

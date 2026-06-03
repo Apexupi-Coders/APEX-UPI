@@ -24,6 +24,9 @@ public class TransactionEntity {
     @Column(name = "tr", nullable = false, length = 50)
     private String tr;
 
+    @Column(name = "payer_vpa", length = 100)
+    private String payerVpa;
+
     @Column(name = "pa", nullable = false, length = 100)
     private String pa;
 
@@ -93,6 +96,7 @@ public class TransactionEntity {
         TransactionContext ctx = new TransactionContext();
         ctx.setTid(this.tid);
         ctx.setTr(this.tr);
+        ctx.setPayerVpa(this.payerVpa);
         ctx.setPa(this.pa);
         ctx.setPn(this.pn);
         ctx.setMc(this.mc);
@@ -122,6 +126,7 @@ public class TransactionEntity {
         TransactionEntity entity = new TransactionEntity();
         entity.tid = ctx.getTid();
         entity.tr = ctx.getTr();
+        entity.payerVpa = ctx.getPayerVpa();
         entity.pa = ctx.getPa();
         entity.pn = ctx.getPn();
         entity.mc = ctx.getMc();
@@ -153,6 +158,14 @@ public class TransactionEntity {
 
     public String getTr() {
         return tr;
+    }
+
+    public String getPayerVpa() {
+        return payerVpa;
+    }
+
+    public void setPayerVpa(String payerVpa) {
+        this.payerVpa = payerVpa;
     }
 
     public String getPa() {

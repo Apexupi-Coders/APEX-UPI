@@ -27,6 +27,7 @@ public class PaymentController {
 
     private final KafkaPublisherService kafkaPublisher;
     private final IdempotencyService idempotencyService;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     private static final String AMOUNT_PATTERN = "^\\d+(\\.\\d{1,2})?$";
     private static final String REMARKS_PATTERN = "^[a-zA-Z0-9 ]*$";
@@ -45,8 +46,14 @@ public class PaymentController {
         }
         validateTxnId(request.getTxnId(), tpapId);
 
+        // DEMO FEATURE: Reject in Ingress but explicitly save to DB so Dashboard can see it!
+        if (request.getPayerVpa() == null || request.getPayerVpa().trim().isEmpty()) {
+            saveRejectionToDb(request, "Rejected at Ingress: Payer VPA is required");
+            throw new RequestValidationException("MISSING_REQUIRED_FIELD",
+                    "Field 'payerVpa' is required", "payerVpa");
+        }
+
         // Validate other required fields
-        validateRequired(request.getPayerVpa(), "payerVpa");
         validateRequired(request.getPayeeVpa(), "payeeVpa");
         validateRequired(request.getCurrency(), "currency");
         validateRequired(request.getEncryptedPin(), "encryptedPin");
@@ -54,21 +61,21 @@ public class PaymentController {
         validateRequired(request.getTxnType(), "txnType");
 
         // Validate VPAs
-        validateVpa(request.getPayerVpa());
         validateVpa(request.getPayeeVpa());
 
         // Payer != Payee
-        if (request.getPayerVpa().equalsIgnoreCase(request.getPayeeVpa())) {
+        if (request.getPayerVpa() != null && request.getPayerVpa().equalsIgnoreCase(request.getPayeeVpa())) {
             throw new RequestValidationException("PAYER_PAYEE_SAME",
                     "Payer VPA must differ from Payee VPA");
         }
 
         // Validate amount (null → MISSING, empty/invalid → INVALID_AMOUNT)
         if (request.getAmount() == null) {
+            saveRejectionToDb(request, "Field 'amount' is required");
             throw new RequestValidationException("MISSING_REQUIRED_FIELD",
                     "Field 'amount' is required", "amount");
         }
-        validateAmount(request.getAmount());
+        validateAmount(request.getAmount(), request);
 
         // Validate currency
         if (!"INR".equals(request.getCurrency())) {
@@ -149,20 +156,41 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
-    private void validateAmount(String amountStr) {
+    private void validateAmount(String amountStr, PaymentInitiateRequest request) {
         if (!amountStr.matches(AMOUNT_PATTERN)) {
+            saveRejectionToDb(request, "Amount must be a positive number with at most 2 decimal places");
             throw new RequestValidationException("INVALID_AMOUNT",
                     "Amount must be a positive number with at most 2 decimal places", "amount");
         }
         try {
             BigDecimal amount = new BigDecimal(amountStr);
             if (amount.compareTo(MIN_AMOUNT) < 0 || amount.compareTo(MAX_AMOUNT) > 0) {
+                saveRejectionToDb(request, "Amount must be between 1.00 and 100000.00");
                 throw new RequestValidationException("INVALID_AMOUNT",
                         "Amount must be between 1.00 and 100000.00", "amount");
             }
         } catch (NumberFormatException e) {
+            saveRejectionToDb(request, "Amount must be a valid number");
             throw new RequestValidationException("INVALID_AMOUNT",
                     "Amount must be a valid number", "amount");
+        }
+    }
+
+    private void saveRejectionToDb(PaymentInitiateRequest request, String reason) {
+        try {
+            jdbcTemplate.update("INSERT INTO transactions (tid, tr, payer_vpa, payee_vpa, amount, state, failure_reason, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "REJ-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
+                request.getTxnId(),
+                request.getPayerVpa() != null ? request.getPayerVpa() : "MISSING_VPA",
+                request.getPayeeVpa() != null ? request.getPayeeVpa() : "UNKNOWN",
+                (request.getAmount() != null && request.getAmount().matches(AMOUNT_PATTERN)) ? new BigDecimal(request.getAmount()) : BigDecimal.ZERO,
+                "FAILED",
+                reason,
+                java.sql.Timestamp.from(Instant.now()),
+                java.sql.Timestamp.from(Instant.now())
+            );
+        } catch (Exception e) {
+            // Ignore DB errors during edge rejection logging
         }
     }
 }

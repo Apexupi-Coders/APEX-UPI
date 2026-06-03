@@ -1,7 +1,6 @@
 package com.pspswitch.orchestrator.orchestrator;
 
-import com.pspswitch.orchestrator.adapter.NpciAdapter;
-import com.pspswitch.orchestrator.controller.WebhookController;
+import com.pspswitch.orchestrator.kafka.NpciRequestProducer;
 import com.pspswitch.orchestrator.model.*;
 import com.pspswitch.orchestrator.service.*;
 import org.slf4j.Logger;
@@ -48,8 +47,8 @@ public class TransactionOrchestrator {
     private final TransactionStateService stateService;
     private final ModePreprocessingService modePreprocessingService;
     private final ValidationService validationService;
-    private final NpciAdapter npciAdapter;
-    private final WebhookController webhookController;
+    private final NpciRequestProducer npciRequestProducer;
+    private final NpciCallbackHandler npciCallbackHandler;
 
     private final ScheduledExecutorService timeoutScheduler = Executors.newScheduledThreadPool(2);
 
@@ -57,14 +56,14 @@ public class TransactionOrchestrator {
             TransactionStateService stateService,
             ModePreprocessingService modePreprocessingService,
             ValidationService validationService,
-            NpciAdapter npciAdapter,
-            WebhookController webhookController) {
+            NpciRequestProducer npciRequestProducer,
+            NpciCallbackHandler npciCallbackHandler) {
         this.idempotencyService = idempotencyService;
         this.stateService = stateService;
         this.modePreprocessingService = modePreprocessingService;
         this.validationService = validationService;
-        this.npciAdapter = npciAdapter;
-        this.webhookController = webhookController;
+        this.npciRequestProducer = npciRequestProducer;
+        this.npciCallbackHandler = npciCallbackHandler;
     }
 
     /**
@@ -113,17 +112,19 @@ public class TransactionOrchestrator {
                 tid, request.getMode(), ppCtx.isRequiresPasscode(), ppCtx.getFlowType());
 
         // ═══════════════════════════════════════════════════════
-        // STEP 4 — VALIDATION
-        // ═══════════════════════════════════════════════════════
-        // If validation fails, ValidationException is thrown and caught by
-        // GlobalExceptionHandler → HTTP 400 + FAILED state.
-        // Idempotency key remains as PROCESSING — next attempt will get duplicate.
-        validationService.validate(request, tid);
-
-        // ═══════════════════════════════════════════════════════
-        // STEP 5 — WRITE PENDING STATE
+        // STEP 4 & 5 — VALIDATION & WRITE STATE
         // ═══════════════════════════════════════════════════════
         TransactionContext context = buildContext(request, tid, ppCtx);
+        
+        try {
+            validationService.validate(request, tid);
+        } catch (com.pspswitch.orchestrator.exception.ValidationException ex) {
+            context.setState(TransactionState.FAILED);
+            context.setFailureReason(ex.getReason());
+            stateService.save(context);
+            throw ex;
+        }
+
         stateService.save(context);
 
         log.info("[ORCHESTRATOR] tid={} | tr={} | mode={} | state=PENDING | am={}",
@@ -151,12 +152,20 @@ public class TransactionOrchestrator {
         String tid = context.getTid();
 
         try {
-            // STEP 6 — NPCI REST CALL
-            // This blocks for 800ms (simulated network latency),
-            // then fires the webhook callback async after 1500ms
-            npciAdapter.forward(tid);
+            // STEP 6 — NPCI KAFKA CALL
+            NpciOutboundRequestEvent event = new NpciOutboundRequestEvent();
+            event.setTxnId(tid);
+            event.setMsgId(UUID.randomUUID().toString());
+            event.setType("PAY");
+            event.setPayerVpa(context.getPayerVpa() != null ? context.getPayerVpa() : "payer@bank");
+            event.setPayeeVpa(context.getPa());
+            event.setAmount(context.getAm());
+            event.setCurrency(context.getCu());
+            event.setTimestamp(Instant.now().toString());
 
-            // After NPCI REST call returns SUBMITTED
+            npciRequestProducer.send(event);
+
+            // After NPCI Kafka call returns SUBMITTED
             context.setState(TransactionState.SUBMITTED);
             stateService.update(context);
 
@@ -174,11 +183,11 @@ public class TransactionOrchestrator {
                 }
             }, NPCI_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-            // Register the timeout future so WebhookController can cancel it
-            webhookController.registerTimeoutFuture(tid, timeoutFuture);
+            // Register the timeout future so NpciCallbackHandler can cancel it
+            npciCallbackHandler.registerTimeoutFuture(tid, timeoutFuture);
 
             // Steps 7-10 are triggered by the NPCI webhook callback
-            // (handled in WebhookController.handleNpciCallback)
+            // (handled in NpciCallbackHandler.handleNpciResponse)
 
         } catch (Exception e) {
             log.error("[ORCHESTRATOR] tid={} | Async saga failed: {}", tid, e.getMessage(), e);
@@ -199,6 +208,7 @@ public class TransactionOrchestrator {
         TransactionContext ctx = new TransactionContext();
         ctx.setTid(tid);
         ctx.setTr(request.getTr());
+        ctx.setPayerVpa(request.getPayerVpa());
         ctx.setPa(request.getPa());
         ctx.setPn(request.getPn());
         ctx.setMc(request.getMc());

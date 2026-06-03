@@ -1,9 +1,9 @@
 package com.pspswitch.tpapingress.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pspswitch.tpapingress.dto.request.BalanceInquiryRequest;
 import com.pspswitch.tpapingress.dto.request.PaymentInitiateRequest;
 import com.pspswitch.tpapingress.dto.request.VpaLookupRequest;
-import com.pspswitch.tpapingress.kafka.KafkaEventEnvelope;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -21,7 +21,8 @@ import java.util.UUID;
 @Service
 public class KafkaPublisherService {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
 
     @Value("${app.kafka.topics.vpa-lookup}")
     private String vpaLookupTopic;
@@ -32,36 +33,80 @@ public class KafkaPublisherService {
     @Value("${app.kafka.topics.payment-initiate}")
     private String paymentInitiateTopic;
 
-    public KafkaPublisherService(KafkaTemplate<String, Object> kafkaTemplate) {
+    public KafkaPublisherService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public boolean publishVpaLookup(VpaLookupRequest request) {
-        return publish(vpaLookupTopic, "VPA_LOOKUP_REQUESTED", request.getTxnId(), request);
+        java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        payload.put("txnId", request.getTxnId());
+        payload.put("correlationId", UUID.randomUUID().toString());
+        payload.put("eventId", UUID.randomUUID().toString());
+        payload.put("payerVpa", request.getRequesterVpa());
+        payload.put("txnType", "VPA_LOOKUP");
+        payload.put("requestTime", Instant.now().toString());
+
+        try {
+            String json = objectMapper.writeValueAsString(payload);
+            kafkaTemplate.send(vpaLookupTopic, request.getTxnId(), json);
+            log.info("Published VPA_LOOKUP to topic {} for txnId={}", vpaLookupTopic, request.getTxnId());
+        } catch (Exception e) {
+            log.error("Failed to publish VPA_LOOKUP: {}", e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     public boolean publishBalanceInquiry(BalanceInquiryRequest request) {
-        return publish(balanceInquiryTopic, "BALANCE_INQUIRY_REQUESTED", request.getTxnId(), request);
+        java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        payload.put("txnId", request.getTxnId());
+        payload.put("correlationId", UUID.randomUUID().toString());
+        payload.put("eventId", UUID.randomUUID().toString());
+        payload.put("payerVpa", request.getVpa());
+        payload.put("currency", "INR");
+        payload.put("txnType", "BALANCE");
+        payload.put("requestTime", Instant.now().toString());
+
+        try {
+            String json = objectMapper.writeValueAsString(payload);
+            kafkaTemplate.send(balanceInquiryTopic, request.getTxnId(), json);
+            log.info("Published BALANCE_INQUIRY to topic {} for txnId={}", balanceInquiryTopic, request.getTxnId());
+        } catch (Exception e) {
+            log.error("Failed to publish BALANCE_INQUIRY: {}", e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     public boolean publishPaymentInitiate(PaymentInitiateRequest request) {
-        return publish(paymentInitiateTopic, "PAYMENT_INITIATE_REQUESTED", request.getTxnId(), request);
-    }
+        java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        payload.put("txnId", request.getTxnId());
+        payload.put("correlationId", UUID.randomUUID().toString());
+        payload.put("eventId", UUID.randomUUID().toString());
+        payload.put("payerVpa", request.getPayerVpa());
+        payload.put("payeeVpa", request.getPayeeVpa());
+        payload.put("payeeName", "Payee Name");
+        payload.put("mcc", request.getMcc() != null ? request.getMcc() : "0000");
+        
+        if (request.getAmount() != null) {
+            payload.put("amount", new java.math.BigDecimal(request.getAmount()));
+        } else {
+            payload.put("amount", java.math.BigDecimal.ZERO);
+        }
+        
+        payload.put("currency", request.getCurrency() != null ? request.getCurrency() : "INR");
+        payload.put("txnType", "PAY");
+        payload.put("requestTime", Instant.now().toString());
 
-    private boolean publish(String topic, String eventType, String txnId, Object data) {
-        KafkaEventEnvelope envelope = KafkaEventEnvelope.builder()
-                .eventId(UUID.randomUUID().toString())
-                .eventType(eventType)
-                .tpapId(extractTpapId(txnId))
-                .txnId(txnId)
-                .correlationId(UUID.randomUUID().toString())
-                .timestamp(Instant.now().toString())
-                .schemaVersion("1.0")
-                .data(data)
-                .build();
-
-        kafkaTemplate.send(topic, txnId, envelope);
-        log.info("Published {} to topic {} for txnId={}", eventType, topic, txnId);
+        try {
+            String json = objectMapper.writeValueAsString(payload);
+            kafkaTemplate.send(paymentInitiateTopic, request.getTxnId(), json);
+            log.info("Published PAYMENT_INITIATE to topic {} for txnId={}", paymentInitiateTopic, request.getTxnId());
+        } catch (Exception e) {
+            log.error("Failed to publish PAYMENT_INITIATE: {}", e.getMessage());
+            return false;
+        }
         return true;
     }
 

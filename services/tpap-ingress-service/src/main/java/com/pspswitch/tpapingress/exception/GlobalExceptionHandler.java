@@ -34,6 +34,9 @@ public class GlobalExceptionHandler {
                         List.of(ErrorDetail.builder().field(ex.getField()).issue(ex.getMessage()).build()) :
                         null)
                 .build();
+                
+        log.warn("[INGRESS] REJECTED | 400 Bad Request | code={} | reason={}", ex.getErrorCode(), ex.getMessage());
+        
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
@@ -69,6 +72,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .header("Retry-After", "60")
                 .body(error);
+    }
+
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        String errorMsg = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + " " + err.getDefaultMessage())
+                .findFirst().orElse("Validation failed");
+        
+        log.warn("[INGRESS] REJECTED | 400 Bad Request | reason={}", errorMsg);
+        
+        return buildError(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", errorMsg);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

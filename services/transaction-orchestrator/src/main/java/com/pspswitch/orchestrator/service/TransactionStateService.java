@@ -144,4 +144,21 @@ public class TransactionStateService {
         cache.clear();
         repository.deleteAll();
     }
+
+    /**
+     * Retrieves all transactions from PostgreSQL (decrypts PII) for the dashboard.
+     */
+    public java.util.List<TransactionContext> getAllTransactions() {
+        return repository.findAll().stream()
+                .map(entity -> {
+                    // Convert to POJO first, then decrypt, so we don't mutate the Hibernate entity!
+                    TransactionContext ctx = entity.toContext();
+                    ctx.setPa(dataCryptoService.decrypt(ctx.getPa()));
+                    ctx.setPn(dataCryptoService.decrypt(ctx.getPn()));
+                    ctx.setMid(dataCryptoService.decrypt(ctx.getMid()));
+                    // payerVpa is stored as plaintext (not encrypted)
+                    return ctx;
+                })
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

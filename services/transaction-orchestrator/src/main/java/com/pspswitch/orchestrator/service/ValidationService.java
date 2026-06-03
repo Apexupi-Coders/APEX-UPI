@@ -48,12 +48,17 @@ public class ValidationService {
             fail(tid, "Amount " + request.getAm() + " is below minimum " + request.getMam());
         }
 
-        // Rule 4: Payee UPI ID is mandatory
+        // Rule 4: Payer UPI ID is mandatory
+        if (isBlank(request.getPayerVpa()) || "unknown@upi".equals(request.getPayerVpa()) || "null".equals(request.getPayerVpa())) {
+            fail(tid, "Payer UPI ID is mandatory");
+        }
+
+        // Rule 5: Payee UPI ID is mandatory
         if (isBlank(request.getPa())) {
             fail(tid, "Payee UPI ID is mandatory");
         }
 
-        // Rule 5: Payee name is mandatory
+        // Rule 6: Payee name is mandatory
         if (isBlank(request.getPn())) {
             fail(tid, "Payee name is mandatory");
         }

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX-UPI</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-base: #050505;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+
+            --success: #22c55e;
+            --failed: #ef4444;
+            --pending: #eab308;
+            --initiated: #8b5cf6;
+            --compensated: #f97316;
+        }
+
+        html {
+            font-size: 14px;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-base);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .app-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding: 20px 24px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+                transform: scale(1);
+            }
+
+            100% {
+                box-shadow: 0 0 25px rgba(139, 92, 246, 0.5);
+                transform: scale(1.02);
+            }
+        }
+
+        .app-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .app-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        .mode-toggles {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .conn-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot.live {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: blink 1.5s infinite;
+        }
+
+        .dot.dead {
+            background: var(--failed);
+            box-shadow: 0 0 10px var(--failed);
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            padding: 24px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 36px;
+            font-weight: 800;
+            margin-top: 8px;
+            letter-spacing: -1px;
+            background: linear-gradient(180deg, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-card.success .metric-value {
+            background: linear-gradient(180deg, #4ade80, #166534);
+            -webkit-background-clip: text;
+        }
+
+        .metric-card.failed .metric-value {
+            background: linear-gradient(180deg, #f87171, #7f1d1d);
+            -webkit-background-clip: text;
+        }
+
+        .metric-card.tps .metric-value {
+            background: linear-gradient(180deg, #60a5fa, #1e3a8a);
+            -webkit-background-clip: text;
+        }
+
+        .upload-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 32px;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: var(--glass-hover);
+        }
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 16px 20px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--glass-hover);
+        }
+
+        td {
+            padding: 16px 20px;
+            white-space: nowrap;
+        }
+
+        .mono {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 12.5px;
+            color: #d4d4d8;
+        }
+
+        .amount {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-pill.success {
+            color: var(--success);
+            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .status-pill.failed {
+            color: var(--failed);
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .status-pill.pending {
+            color: var(--pending);
+            border-color: rgba(234, 179, 8, 0.3);
+            background: rgba(234, 179, 8, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        const ORCHESTRATOR_URL = 'http://localhost:8082';
+
+        function StatusPill({ status }) {
+            let className = 'status-pill ';
+            const s = (status || '').toUpperCase();
+            if (s === 'SUCCESS' || s === 'ACCEPTED' || s === 'true') className += 'success';
+            else if (s === 'FAILED' || s === 'false') className += 'failed';
+            else if (['PENDING', 'PROCESSING', 'SUBMITTED'].includes(s)) className += 'pending';
+            else className += 'initiated';
+
+            return (
+                <span className={className}>
+                    {s}
+                </span>
+            );
+        }
+
+        function Metric({ label, value, type }) {
+            return (
+                <div className={`glass-panel metric-card ${type || ''}`}>
+                    <div className="metric-label">{label}</div>
+                    <div className="metric-value">{value}</div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [mode, setMode] = useState('LIVE'); // 'LIVE' or 'JMETER'
+
+            // Live State
+            const [liveData, setLiveData] = useState([]);
+            const [connected, setConnected] = useState(false);
+            const [autoRefresh, setAutoRefresh] = useState(true);
+            const [tpsHistory, setTpsHistory] = useState([]);
+
+            // JMeter State
+            const [jmeterData, setJmeterData] = useState(null);
+            const fileInputRef = useRef(null);
+
+            const intervalRef = useRef(null);
+
+            // Poll Live Data
+            const poll = useCallback(async () => {
+                if (mode !== 'LIVE') return;
+                try {
+                    let newTxns = [];
+                    let isConnected = false;
+                    try {
+                        const res = await fetch(`${ORCHESTRATOR_URL}/api/v1/control/status`, { signal: AbortSignal.timeout(3000) });
+                        if (res.ok) {
+                            isConnected = true;
+                            const data = await res.json();
+                            if (data.transactions) newTxns = data.transactions;
+                        }
+                    } catch (e) { }
+
+                    setConnected(isConnected);
+
+                    if (newTxns.length > 0) {
+                        setLiveData(prev => {
+                            const map = new Map(prev.map(t => [t.txnId, t]));
+                            newTxns.forEach(t => map.set(t.txnId, { ...map.get(t.txnId), ...t }));
+                            return Array.from(map.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 500);
+                        });
+                    }
+
+                    setTpsHistory(prev => {
+                        const now = Date.now();
+                        return [...prev, { time: now, count: newTxns.length }].filter(e => now - e.time < 10000);
+                    });
+                } catch (err) {
+                    setConnected(false);
+                }
+            }, [mode]);
+
+            useEffect(() => {
+                if (autoRefresh && mode === 'LIVE') {
+                    poll();
+                    intervalRef.current = setInterval(poll, 2000);
+                }
+                return () => clearInterval(intervalRef.current);
+            }, [autoRefresh, mode, poll]);
+
+            // Handle JMeter CSV Upload
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    parseCSV(ev.target.result);
+                };
+                reader.readAsText(file);
+            };
+
+            const parseCSV = (text) => {
+                const lines = text.trim().split('\n');
+                if (lines.length < 2) return;
+
+                const headers = lines[0].split(',');
+                const rows = lines.slice(1).map(line => {
+                    const values = line.split(',');
+                    let obj = {};
+                    headers.forEach((h, i) => obj[h] = values[i]);
+                    return obj;
+                });
+
+                let minTime = Infinity;
+                let maxTime = 0;
+                let successCount = 0;
+                let failCount = 0;
+                let totalLatency = 0;
+
+                rows.forEach(r => {
+                    const ts = parseInt(r.timeStamp);
+                    if (ts < minTime) minTime = ts;
+                    if (ts > maxTime) maxTime = ts;
+                    if (r.success === 'true') successCount++;
+                    else failCount++;
+                    totalLatency += parseInt(r.elapsed || 0);
+                });
+
+                const total = rows.length;
+                const durationSec = (maxTime - minTime) / 1000;
+                const tps = durationSec > 0 ? (total / durationSec) : 0;
+                const avgLatency = total > 0 ? (totalLatency / total) : 0;
+
+                setJmeterData({
+                    total,
+                    successCount,
+                    failCount,
+                    tps: tps.toFixed(1),
+                    avgLatency: avgLatency.toFixed(0),
+                    rows: rows.reverse().slice(0, 100) // preview last 100
+                });
+            };
+
+            const renderLiveMetrics = () => {
+                const total = liveData.length;
+                const success = liveData.filter(t => t.status === 'SUCCESS' || t.status === 'ACCEPTED').length;
+                const failed = liveData.filter(t => t.status === 'FAILED').length;
+                const tps = tpsHistory.reduce((sum, e) => sum + e.count, 0) / Math.max(1, 10);
+
+                return (
+                    <div className="metrics-grid">
+                        <Metric label="Total Transactions" value={total} type="total" />
+                        <Metric label="Success" value={success} type="success" />
+                        <Metric label="Failed" value={failed} type="failed" />
+                        <Metric label="Live TPS" value={tps.toFixed(1)} type="tps" />
+                    </div>
+                );
+            };
+
+            const renderJMeterMetrics = () => {
+                if (!jmeterData) return null;
+                return (
+                    <div className="metrics-grid">
+                        <Metric label="Total Requests" value={jmeterData.total} type="total" />
+                        <Metric label="Success" value={jmeterData.successCount} type="success" />
+                        <Metric label="Failed" value={jmeterData.failCount} type="failed" />
+                        <Metric label="Avg Latency (ms)" value={jmeterData.avgLatency} type="pending" />
+                        <Metric label="Throughput (TPS)" value={jmeterData.tps} type="tps" />
+                    </div>
+                );
+            };
+
+            return (
+                <div className="app-container">
+                    <header className="glass-panel header">
+                        <div className="logo-section">
+                            <div className="logo-icon">A</div>
+                            <div>
+                                <div className="app-title">APEX-UPI Switch</div>
+                                <div className="app-subtitle">Real-time Monitoring & Analysis</div>
+                            </div>
+                        </div>
+
+                        <div className="mode-toggles">
+                            <button className={`mode-btn ${mode === 'LIVE' ? 'active' : ''}`} onClick={() => setMode('LIVE')}>Live Traffic</button>
+                            <button className={`mode-btn ${mode === 'JMETER' ? 'active' : ''}`} onClick={() => setMode('JMETER')}>JMeter Report</button>
+                        </div>
+
+                        <div className="header-actions">
+                            {mode === 'LIVE' && (
+                                <>
+                                    <div className="glass-panel conn-status">
+                                        <span className={`dot ${connected ? 'live' : 'dead'}`}></span>
+                                        {connected ? 'Orchestrator Connected' : 'Disconnected'}
+                                    </div>
+                                    <button className="btn-secondary" onClick={() => setAutoRefresh(!autoRefresh)}>
+                                        {autoRefresh ? 'Pause Auto-Refresh' : 'Resume Auto-Refresh'}
+                                    </button>
+                                </>
+                            )}
+                            {mode === 'JMETER' && (
+                                <button className="btn-primary" onClick={() => fileInputRef.current.click()}>
+                                    Upload CSV
+                                </button>
+                            )}
+                        </div>
+                    </header>
+
+                    {mode === 'LIVE' ? (
+                        <>
+                            {renderLiveMetrics()}
+                            <div className="glass-panel table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Transaction ID</th>
+                                            <th>Payer VPA</th>
+                                            <th>Payee VPA</th>
+                                            <th style={{ textAlign: 'right' }}>Amount (INR)</th>
+                                            <th>Status</th>
+                                            <th>Timestamp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {liveData.length === 0 && (
+                                            <tr>
+                                                <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                                                    No transactions found in live database.
+                                                </td>
+                                            </tr>
+                                        )}
+                                        {liveData.map((txn, i) => (
+                                            <tr key={txn.txnId + i}>
+                                                <td className="mono">{txn.txnId}</td>
+                                                <td>{txn.payerVpa || '-'}</td>
+                                                <td>{txn.payeeVpa || '-'}</td>
+                                                <td className="amount">{txn.amount || '-'}</td>
+                                                <td><StatusPill status={txn.status} /></td>
+                                                <td style={{ color: 'var(--text-secondary)' }}>{txn.timestamp ? new Date(txn.timestamp).toLocaleString() : '-'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <input
+                                type="file"
+                                accept=".csv"
+                                style={{ display: 'none' }}
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                            />
+
+                            {!jmeterData ? (
+                                <div className="glass-panel upload-zone" onClick={() => fileInputRef.current.click()}>
+                                    <svg className="upload-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Upload JMeter results.csv</h3>
+                                    <p style={{ color: 'var(--text-muted)' }}>Drag and drop or click to browse</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {renderJMeterMetrics()}
+                                    <div className="glass-panel table-wrapper">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Label (API)</th>
+                                                    <th>Response Code</th>
+                                                    <th>Latency (ms)</th>
+                                                    <th>Success</th>
+                                                    <th>Timestamp</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {jmeterData.rows.map((row, i) => (
+                                                    <tr key={i}>
+                                                        <td className="mono">{row.label}</td>
+                                                        <td>{row.responseCode}</td>
+                                                        <td className="mono">{row.elapsed} ms</td>
+                                                        <td><StatusPill status={row.success} /></td>
+                                                        <td style={{ color: 'var(--text-secondary)' }}>{row.timeStamp ? new Date(parseInt(row.timeStamp)).toLocaleString() : '-'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>

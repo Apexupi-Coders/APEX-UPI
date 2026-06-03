@@ -133,7 +133,7 @@ public class DataCryptoService {
         entity.setPn(encrypt(entity.getPn()));
         entity.setMid(encrypt(entity.getMid()));
 
-        log.info("[CRYPTO] tid={} | PII fields encrypted before persistence", entity.getTid());
+        log.debug("[CRYPTO] tid={} | PII fields encrypted before persistence", entity.getTid());
     }
 
     /**
@@ -148,7 +148,7 @@ public class DataCryptoService {
         entity.setPn(decrypt(entity.getPn()));
         entity.setMid(decrypt(entity.getMid()));
 
-        log.info("[CRYPTO] tid={} | PII fields decrypted after read", entity.getTid());
+        log.debug("[CRYPTO] tid={} | PII fields decrypted after read", entity.getTid());
     }
 
     public boolean isCryptoEnabled() {
