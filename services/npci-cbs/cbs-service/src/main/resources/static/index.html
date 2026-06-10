@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBS Service — Core Banking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e14;
+            --surface: #111720;
+            --border: #1e2d40;
+            --accent: #00d4aa;
+            --accent2: #0088ff;
+            --red: #ff4d6a;
+            --amber: #ffb347;
+            --green: #00d4aa;
+            --text: #e2e8f0;
+            --muted: #5a7a9a;
+            --mono: 'IBM Plex Mono', monospace;
+            --sans: 'IBM Plex Sans', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+
+        /* Layout */
+        .shell { display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .main { flex: 1; overflow-y: auto; }
+
+        /* Sidebar */
+        .brand { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+        .brand-tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+        .brand-name { font-size: 15px; font-weight: 600; color: var(--text); }
+        .brand-port { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        .nav { padding: 12px 8px; flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px; cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 500; transition: all 0.15s; margin-bottom: 2px; }
+        .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+        .nav-item.active { color: var(--accent); background: rgba(0,212,170,0.08); }
+        .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+        .status-panel { padding: 12px 14px; border-top: 1px solid var(--border); }
+        .status-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+        .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .status-name { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+        .pill { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+        .pill-up { background: rgba(0,212,170,0.15); color: var(--accent); }
+        .pill-down { background: rgba(255,77,106,0.15); color: var(--red); }
+        .pill-checking { background: rgba(90,122,154,0.15); color: var(--muted); }
+
+        /* Pages */
+        .page { display: none; padding: 28px 32px; }
+        .page.active { display: block; }
+
+        /* Page header */
+        .page-header { margin-bottom: 24px; }
+        .page-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+        .page-sub { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+        /* Stat cards */
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .stat-label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+        .stat-value { font-family: var(--mono); font-size: 24px; font-weight: 600; color: var(--text); }
+        .stat-value.green { color: var(--accent); }
+        .stat-value.red { color: var(--red); }
+        .stat-value.amber { color: var(--amber); }
+        .stat-value.blue { color: var(--accent2); }
+
+        /* Card */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+        .card-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+        .card-body { padding: 18px; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+        .data-table td { padding: 11px 14px; border-bottom: 1px solid rgba(30,45,64,0.5); color: var(--text); font-size: 13px; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .mono { font-family: var(--mono); font-size: 12px; }
+
+        /* Tags */
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: var(--mono); }
+        .tag-green { background: rgba(0,212,170,0.12); color: var(--accent); }
+        .tag-red { background: rgba(255,77,106,0.12); color: var(--red); }
+        .tag-amber { background: rgba(255,179,71,0.12); color: var(--amber); }
+        .tag-blue { background: rgba(0,136,255,0.12); color: var(--accent2); }
+
+        /* Buttons */
+        .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; font-family: var(--sans); }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-primary:hover { background: #00bfa0; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .refresh-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; font-family: var(--mono); transition: all 0.15s; }
+        .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Form */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+        .field input, .field select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; color: var(--text); font-size: 13px; font-family: var(--sans); outline: none; transition: border 0.15s; }
+        .field input:focus, .field select:focus { border-color: var(--accent); }
+        .field select option { background: var(--surface); }
+
+        /* Response box */
+        .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-family: var(--mono); font-size: 12px; color: var(--text); white-space: pre-wrap; max-height: 320px; overflow-y: auto; line-height: 1.6; }
+        .response-box.ok { border-color: rgba(0,212,170,0.3); }
+        .response-box.err { border-color: rgba(255,77,106,0.3); color: var(--red); }
+
+        /* Balance lookup */
+        .balance-card { background: var(--bg); border: 1px solid var(--accent); border-radius: 8px; padding: 20px; display: none; }
+        .balance-vpa { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+        .balance-amount { font-family: var(--mono); font-size: 36px; font-weight: 600; color: var(--accent); margin-bottom: 12px; }
+        .balance-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .balance-meta-item { font-size: 12px; }
+        .balance-meta-label { color: var(--muted); margin-bottom: 2px; }
+        .balance-meta-value { font-family: var(--mono); color: var(--text); font-size: 13px; }
+
+        /* Empty state */
+        .empty { padding: 32px; text-align: center; color: var(--muted); font-size: 13px; }
+
+        /* Endpoint list */
+        .endpoint-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: opacity 0.15s; }
+        .endpoint-row:last-child { border-bottom: none; }
+        .endpoint-row:hover { opacity: 0.8; }
+        .method-tag { font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; min-width: 40px; text-align: center; }
+        .method-get { background: rgba(0,212,170,0.15); color: var(--accent); }
+        .method-post { background: rgba(0,136,255,0.15); color: var(--accent2); }
+        .endpoint-path { font-family: var(--mono); font-size: 12px; color: var(--text); }
+
+        /* Recon */
+        .recon-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        .recon-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+        .recon-box-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+        .recon-num { font-family: var(--mono); font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+        .recon-sub { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+        .recon-status { padding: 12px 18px; border-radius: 6px; font-family: var(--mono); font-size: 13px; font-weight: 600; text-align: center; margin-top: 14px; }
+        .recon-balanced { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3); color: var(--accent); }
+        .recon-mismatch { background: rgba(255,77,106,0.1); border: 1px solid rgba(255,77,106,0.3); color: var(--red); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="shell">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">
+            <div class="brand-tag">Core Banking</div>
+            <div class="brand-name">CBS Service</div>
+            <div class="brand-port">localhost:8083</div>
+        </div>
+
+        <nav class="nav">
+            <div class="nav-item active" onclick="nav(event,'accounts')">
+                <span class="nav-icon">◈</span> Accounts
+            </div>
+            <div class="nav-item" onclick="nav(event,'balance')">
+                <span class="nav-icon">◉</span> Balance Lookup
+            </div>
+            <div class="nav-item" onclick="nav(event,'ledgers')">
+                <span class="nav-icon">▤</span> Ledgers
+            </div>
+            <div class="nav-item" onclick="nav(event,'transactions')">
+                <span class="nav-icon">↕</span> Transactions
+            </div>
+            <div class="nav-item" onclick="nav(event,'reconcile')">
+                <span class="nav-icon">⊞</span> Reconciliation
+            </div>
+            <div class="nav-item" onclick="nav(event,'endpoints')">
+                <span class="nav-icon">⌁</span> API Reference
+            </div>
+        </nav>
+
+        <div class="status-panel">
+            <div class="status-label">Service Health</div>
+            <div class="status-row">
+                <span class="status-name">cbs-service</span>
+                <span class="pill pill-checking" id="pill-cbs">checking</span>
+            </div>
+            <div class="status-row">
+                <span class="status-name">debit-db :5433</span>
+                <span class="pill pill-checking" id="pill-debit">checking</span>
+            </div>
+            <div class="status-row">
+                <span class="status-name">credit-db :5434</span>
+                <span class="pill pill-checking" id="pill-credit">checking</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Accounts Page -->
+        <div id="page-accounts" class="page active">
+            <div class="page-header">
+                <div class="page-title">CBS Accounts</div>
+                <div class="page-sub">GET /api/cbs/accounts</div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Accounts</div>
+                    <div class="stat-value blue" id="stat-total">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value green" id="stat-active">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Frozen / Dormant</div>
+                    <div class="stat-value red" id="stat-frozen">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Balance</div>
+                    <div class="stat-value amber" id="stat-balance">—</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">All CBS Accounts</span>
+                    <button class="refresh-btn" onclick="loadAccounts()">↻ Refresh</button>
+                </div>
+                <div id="accounts-table"><div class="empty">Loading accounts...</div></div>
+            </div>
+        </div>
+
+        <!-- Balance Lookup Page -->
+        <div id="page-balance" class="page">
+            <div class="page-header">
+                <div class="page-title">Balance Lookup</div>
+                <div class="page-sub">GET /api/cbs/account/{vpa}/balance</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Lookup by VPA</span></div>
+                <div class="card-body">
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr auto; align-items: end;">
+                        <div class="field">
+                            <label>VPA</label>
+                            <input type="text" id="lookup-vpa" value="alice@sbi" placeholder="e.g. alice@sbi">
+                        </div>
+                        <div class="field">
+                            <label>Quick Select</label>
+                            <select onchange="document.getElementById('lookup-vpa').value=this.value">
+                                <option value="alice@sbi">alice@sbi — Alice Sharma</option>
+                                <option value="bob@hdfc">bob@hdfc — Bob Kumar</option>
+                                <option value="charlie@icici">charlie@icici — Charlie Mehta</option>
+                                <option value="diana@axis">diana@axis — Diana Patel</option>
+                                <option value="eve@kotak">eve@kotak — Eve Nair</option>
+                                <option value="merchant@ybl">merchant@ybl — Test Merchant</option>
+                                <option value="frozen@hdfc">frozen@hdfc — Frozen Account</option>
+                                <option value="dormant@sbi">dormant@sbi — Dormant Account</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="lookupBalance()">Lookup</button>
+                        </div>
+                    </div>
+
+                    <div class="balance-card" id="balance-result-card">
+                        <div class="balance-vpa" id="br-vpa"></div>
+                        <div class="balance-amount" id="br-balance"></div>
+                        <div class="balance-meta">
+                            <div class="balance-meta-item">
+                                <div class="balance-meta-label">Account Number</div>
+                                <div class="balance-meta-value" id="br-acc"></div>
+                            </div>
+                            <div class="balance-meta-item">
+                                <div class="balance-meta-label">Account Name</div>
+                                <div class="balance-meta-value" id="br-name"></div>
+                            </div>
+                            <div class="balance-meta-item">
+                                <div class="balance-meta-label">Status</div>
+                                <div class="balance-meta-value" id="br-status"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="response-box" id="balance-raw" style="display:none; margin-top:14px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledgers Page -->
+        <div id="page-ledgers" class="page">
+            <div class="page-header">
+                <div class="page-title">Ledgers</div>
+                <div class="page-sub">Debit & Credit transaction ledgers</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Debit Ledger</span>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span class="card-sub">GET /api/cbs/ledger/debit</span>
+                        <button class="refresh-btn" onclick="loadDebitLedger()">↻ Refresh</button>
+                    </div>
+                </div>
+                <div id="debit-ledger-table"><div class="empty">Loading debit ledger...</div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Credit Ledger</span>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span class="card-sub">GET /api/cbs/ledger/credit</span>
+                        <button class="refresh-btn" onclick="loadCreditLedger()">↻ Refresh</button>
+                    </div>
+                </div>
+                <div id="credit-ledger-table"><div class="empty">Loading credit ledger...</div></div>
+            </div>
+        </div>
+
+        <!-- Transactions Page -->
+        <div id="page-transactions" class="page">
+            <div class="page-header">
+                <div class="page-title">Transaction History</div>
+                <div class="page-sub">GET /api/cbs/account/{vpa}/transactions</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Lookup Transactions</span></div>
+                <div class="card-body">
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr auto; align-items: end;">
+                        <div class="field">
+                            <label>VPA</label>
+                            <input type="text" id="txn-vpa" value="alice@sbi">
+                        </div>
+                        <div class="field">
+                            <label>Quick Select</label>
+                            <select onchange="document.getElementById('txn-vpa').value=this.value">
+                                <option value="alice@sbi">alice@sbi</option>
+                                <option value="bob@hdfc">bob@hdfc</option>
+                                <option value="charlie@icici">charlie@icici</option>
+                                <option value="diana@axis">diana@axis</option>
+                                <option value="eve@kotak">eve@kotak</option>
+                                <option value="merchant@ybl">merchant@ybl</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="loadTransactions()">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Debits (sent)</span></div>
+                <div id="txn-debits"><div class="empty">Enter a VPA and click Search</div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Credits (received)</span></div>
+                <div id="txn-credits"><div class="empty">Enter a VPA and click Search</div></div>
+            </div>
+        </div>
+
+        <!-- Reconciliation Page -->
+        <div id="page-reconcile" class="page">
+            <div class="page-header">
+                <div class="page-title">End-of-Day Reconciliation</div>
+                <div class="page-sub">GET /api/cbs/reconcile/today</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Today's Summary</span>
+                    <button class="refresh-btn" onclick="loadReconcile()">↻ Run Report</button>
+                </div>
+                <div class="card-body">
+                    <div class="recon-grid" id="recon-grid">
+                        <div class="recon-box">
+                            <div class="recon-box-title">Debits</div>
+                            <div class="recon-num" id="r-debit-count">—</div>
+                            <div class="recon-sub" id="r-debit-total">total: —</div>
+                        </div>
+                        <div class="recon-box">
+                            <div class="recon-box-title">Credits</div>
+                            <div class="recon-num" id="r-credit-count">—</div>
+                            <div class="recon-sub" id="r-credit-total">total: —</div>
+                        </div>
+                        <div class="recon-box">
+                            <div class="recon-box-title">Reversals</div>
+                            <div class="recon-num" id="r-reversal-count">—</div>
+                            <div class="recon-sub" id="r-reversal-total">total: —</div>
+                        </div>
+                    </div>
+                    <div id="recon-status"></div>
+                    <div class="response-box" id="recon-raw" style="margin-top:14px; display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Reference Page -->
+        <div id="page-endpoints" class="page">
+            <div class="page-header">
+                <div class="page-title">API Reference</div>
+                <div class="page-sub">Click any endpoint to call it live</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">CBS Endpoints</span></div>
+                <div class="card-body">
+                    <div class="endpoint-row" onclick="quickGet('/api/cbs/health','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/cbs/health</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/cbs/accounts','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/cbs/accounts</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/cbs/account/alice@sbi/balance','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/cbs/account/{vpa}/balance</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/cbs/account/alice@sbi/transactions','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/cbs/account/{vpa}/transactions</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/cbs/ledger/debit','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/cbs/ledger/debit</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/cbs/ledger/credit','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/cbs/ledger/credit</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/cbs/reconcile/today','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/cbs/reconcile/today</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/actuator/health','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/actuator/health</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Response</span></div>
+                <div class="card-body">
+                    <div class="response-box" id="endpoints-result">Click any endpoint above to call it live</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const BASE = ''; // same-origin: served from :8083
+
+    // ── Navigation ──
+    const pages = { accounts: null, balance: null, ledgers: null, transactions: null, reconcile: null, endpoints: null };
+    function nav(e, id) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + id).classList.add('active');
+        if (id === 'accounts') loadAccounts();
+        if (id === 'ledgers') { loadDebitLedger(); loadCreditLedger(); }
+        if (id === 'reconcile') loadReconcile();
+    }
+
+    // ── HTTP helper ──
+    async function api(path) {
+        const r = await fetch(BASE + path);
+        const text = await r.text();
+        return { ok: r.ok, status: r.status, text, json: () => JSON.parse(text) };
+    }
+
+    function fmt(text) {
+        try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return text; }
+    }
+
+    function setBox(id, text, state) {
+        const el = document.getElementById(id);
+        el.className = 'response-box ' + (state || '');
+        el.textContent = fmt(text);
+    }
+
+    async function quickGet(path, boxId) {
+        setBox(boxId, 'Loading...', 'loading');
+        try {
+            const r = await api(path);
+            setBox(boxId, r.text, r.ok ? 'ok' : 'err');
+        } catch(e) {
+            setBox(boxId, e.message, 'err');
+        }
+    }
+
+    // ── Accounts ──
+    async function loadAccounts() {
+        document.getElementById('accounts-table').innerHTML = '<div class="empty">Loading...</div>';
+        try {
+            const r = await api('/api/cbs/accounts');
+            const d = r.json();
+            const accounts = d.accounts || [];
+
+            let total = accounts.length;
+            let active = accounts.filter(a => a.status === 'ACTIVE').length;
+            let frozen = accounts.filter(a => a.status !== 'ACTIVE').length;
+            let totalBal = accounts.reduce((s, a) => s + parseFloat(a.balance || 0), 0);
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-active').textContent = active;
+            document.getElementById('stat-frozen').textContent = frozen;
+            document.getElementById('stat-balance').textContent = '₹' + totalBal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+            if (!accounts.length) {
+                document.getElementById('accounts-table').innerHTML = '<div class="empty">No accounts found</div>';
+                return;
+            }
+
+            const rows = accounts.map(a => {
+                const sc = a.status === 'ACTIVE' ? 'tag-green' : a.status === 'FROZEN' ? 'tag-red' : 'tag-amber';
+                const bal = parseFloat(a.balance).toLocaleString('en-IN', {minimumFractionDigits: 2});
+                return `<tr>
+          <td class="mono">${a.vpa}</td>
+          <td>${a.accountName}</td>
+          <td class="mono">${a.accountNumber}</td>
+          <td class="mono">₹${bal}</td>
+          <td><span class="tag ${sc}">${a.status}</span></td>
+        </tr>`;
+            }).join('');
+
+            document.getElementById('accounts-table').innerHTML = `
+        <table class="data-table">
+          <thead><tr><th>VPA</th><th>Name</th><th>Account No.</th><th>Balance</th><th>Status</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+        } catch(e) {
+            document.getElementById('accounts-table').innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
+        }
+    }
+
+    // ── Balance Lookup ──
+    async function lookupBalance() {
+        const vpa = document.getElementById('lookup-vpa').value.trim();
+        if (!vpa) return;
+        document.getElementById('balance-result-card').style.display = 'none';
+        document.getElementById('balance-raw').style.display = 'none';
+        try {
+            const r = await api('/api/cbs/account/' + encodeURIComponent(vpa) + '/balance');
+            if (r.ok) {
+                const d = r.json();
+                const bal = parseFloat(d.balance).toLocaleString('en-IN', {minimumFractionDigits: 2});
+                document.getElementById('br-vpa').textContent = d.vpa;
+                document.getElementById('br-balance').textContent = '₹' + bal;
+                document.getElementById('br-acc').textContent = d.accountNumber;
+                document.getElementById('br-name').textContent = d.accountName;
+                const sc = d.status === 'ACTIVE' ? 'tag-green' : d.status === 'FROZEN' ? 'tag-red' : 'tag-amber';
+                document.getElementById('br-status').innerHTML = `<span class="tag ${sc}">${d.status}</span>`;
+                document.getElementById('balance-result-card').style.display = 'block';
+            } else {
+                const el = document.getElementById('balance-raw');
+                el.style.display = 'block';
+                el.className = 'response-box err';
+                el.textContent = fmt(r.text);
+            }
+        } catch(e) {
+            const el = document.getElementById('balance-raw');
+            el.style.display = 'block';
+            el.className = 'response-box err';
+            el.textContent = e.message;
+        }
+    }
+
+    // ── Debit Ledger ──
+    async function loadDebitLedger() {
+        document.getElementById('debit-ledger-table').innerHTML = '<div class="empty">Loading...</div>';
+        try {
+            const r = await api('/api/cbs/ledger/debit');
+            const d = r.json();
+            const records = d.records || [];
+            if (!records.length) {
+                document.getElementById('debit-ledger-table').innerHTML = '<div class="empty">No debit records yet — send a payment first</div>';
+                return;
+            }
+            const rows = records.map(rec => {
+                const sc = rec.status === 'DEBITED' ? 'tag-red' : rec.status === 'REVERSED' ? 'tag-amber' : 'tag-blue';
+                return `<tr>
+          <td class="mono" style="font-size:11px">${rec.txn_id || '—'}</td>
+          <td class="mono">${rec.payer_vpa || '—'}</td>
+          <td class="mono">₹${parseFloat(rec.amount||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+          <td><span class="tag ${sc}">${rec.status}</span></td>
+          <td class="mono" style="font-size:11px;color:var(--muted)">${rec.created_at ? new Date(rec.created_at).toLocaleString() : '—'}</td>
+        </tr>`;
+            }).join('');
+            document.getElementById('debit-ledger-table').innerHTML = `
+        <table class="data-table">
+          <thead><tr><th>Transaction ID</th><th>Payer VPA</th><th>Amount</th><th>Status</th><th>Created</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+        } catch(e) {
+            document.getElementById('debit-ledger-table').innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
+        }
+    }
+
+    // ── Credit Ledger ──
+    async function loadCreditLedger() {
+        document.getElementById('credit-ledger-table').innerHTML = '<div class="empty">Loading...</div>';
+        try {
+            const r = await api('/api/cbs/ledger/credit');
+            const d = r.json();
+            const records = d.records || [];
+            if (!records.length) {
+                document.getElementById('credit-ledger-table').innerHTML = '<div class="empty">No credit records yet — send a payment first</div>';
+                return;
+            }
+            const rows = records.map(rec => {
+                const sc = rec.status === 'CREDITED' ? 'tag-green' : 'tag-amber';
+                return `<tr>
+          <td class="mono" style="font-size:11px">${rec.txn_id || '—'}</td>
+          <td class="mono">${rec.payee_vpa || '—'}</td>
+          <td class="mono">₹${parseFloat(rec.amount||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+          <td><span class="tag ${sc}">${rec.status}</span></td>
+          <td class="mono" style="font-size:11px;color:var(--muted)">${rec.created_at ? new Date(rec.created_at).toLocaleString() : '—'}</td>
+        </tr>`;
+            }).join('');
+            document.getElementById('credit-ledger-table').innerHTML = `
+        <table class="data-table">
+          <thead><tr><th>Transaction ID</th><th>Payee VPA</th><th>Amount</th><th>Status</th><th>Created</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+        } catch(e) {
+            document.getElementById('credit-ledger-table').innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
+        }
+    }
+
+    // ── Transactions ──
+    async function loadTransactions() {
+        const vpa = document.getElementById('txn-vpa').value.trim();
+        if (!vpa) return;
+        document.getElementById('txn-debits').innerHTML = '<div class="empty">Loading...</div>';
+        document.getElementById('txn-credits').innerHTML = '<div class="empty">Loading...</div>';
+        try {
+            const r = await api('/api/cbs/account/' + encodeURIComponent(vpa) + '/transactions');
+            const d = r.json();
+
+            const debits = d.debits || [];
+            const credits = d.credits || [];
+
+            if (!debits.length) {
+                document.getElementById('txn-debits').innerHTML = '<div class="empty">No debit transactions found</div>';
+            } else {
+                const rows = debits.map(rec => `<tr>
+          <td class="mono" style="font-size:11px">${rec.txn_id||'—'}</td>
+          <td class="mono">₹${parseFloat(rec.amount||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+          <td><span class="tag tag-red">${rec.status}</span></td>
+          <td class="mono" style="font-size:11px;color:var(--muted)">${rec.created_at ? new Date(rec.created_at).toLocaleString() : '—'}</td>
+        </tr>`).join('');
+                document.getElementById('txn-debits').innerHTML = `
+          <table class="data-table">
+            <thead><tr><th>Transaction ID</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+            }
+
+            if (!credits.length) {
+                document.getElementById('txn-credits').innerHTML = '<div class="empty">No credit transactions found</div>';
+            } else {
+                const rows = credits.map(rec => `<tr>
+          <td class="mono" style="font-size:11px">${rec.txn_id||'—'}</td>
+          <td class="mono">₹${parseFloat(rec.amount||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+          <td><span class="tag tag-green">${rec.status}</span></td>
+          <td class="mono" style="font-size:11px;color:var(--muted)">${rec.created_at ? new Date(rec.created_at).toLocaleString() : '—'}</td>
+        </tr>`).join('');
+                document.getElementById('txn-credits').innerHTML = `
+          <table class="data-table">
+            <thead><tr><th>Transaction ID</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+            }
+        } catch(e) {
+            document.getElementById('txn-debits').innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
+            document.getElementById('txn-credits').innerHTML = '';
+        }
+    }
+
+    // ── Reconciliation ──
+    async function loadReconcile() {
+        document.getElementById('recon-status').innerHTML = '';
+        document.getElementById('recon-raw').style.display = 'none';
+        try {
+            const r = await api('/api/cbs/reconcile/today');
+            const d = r.json();
+            document.getElementById('r-debit-count').textContent = d.debits?.count || 0;
+            document.getElementById('r-debit-total').textContent = 'total: ₹' + (d.debits?.total || 0);
+            document.getElementById('r-credit-count').textContent = d.credits?.count || 0;
+            document.getElementById('r-credit-total').textContent = 'total: ₹' + (d.credits?.total || 0);
+            document.getElementById('r-reversal-count').textContent = d.reversals?.count || 0;
+            document.getElementById('r-reversal-total').textContent = 'total: ₹' + (d.reversals?.total || 0);
+
+            const statusEl = document.getElementById('recon-status');
+            if (d.reconciled) {
+                statusEl.innerHTML = `<div class="recon-status recon-balanced">✓ BALANCED — Debits and credits match for ${d.date}</div>`;
+            } else {
+                statusEl.innerHTML = `<div class="recon-status recon-mismatch">⚠ MISMATCH — Investigate for ${d.date}</div>`;
+            }
+
+            const raw = document.getElementById('recon-raw');
+            raw.style.display = 'block';
+            raw.className = 'response-box ok';
+            raw.textContent = fmt(r.text);
+        } catch(e) {
+            document.getElementById('recon-status').innerHTML = `<div class="recon-status recon-mismatch">${e.message}</div>`;
+        }
+    }
+
+    // ── Health Check ──
+    async function checkHealth() {
+        // CBS service
+        try {
+            const r = await fetch('/actuator/health');
+            const p = document.getElementById('pill-cbs');
+            p.textContent = r.ok ? 'UP' : 'DOWN';
+            p.className = 'pill ' + (r.ok ? 'pill-up' : 'pill-down');
+        } catch {
+            const p = document.getElementById('pill-cbs');
+            p.textContent = 'DOWN'; p.className = 'pill pill-down';
+        }
+
+        // Check DB via health endpoint
+        try {
+            const r = await fetch('/api/cbs/health');
+            const d = await r.json();
+            // If health endpoint responds, DBs are reachable
+            const pd = document.getElementById('pill-debit');
+            const pc = document.getElementById('pill-credit');
+            pd.textContent = 'UP'; pd.className = 'pill pill-up';
+            pc.textContent = 'UP'; pc.className = 'pill pill-up';
+        } catch {
+            const pd = document.getElementById('pill-debit');
+            const pc = document.getElementById('pill-credit');
+            pd.textContent = 'unknown'; pd.className = 'pill pill-checking';
+            pc.textContent = 'unknown'; pc.className = 'pill pill-checking';
+        }
+    }
+
+    // ── Init ──
+    loadAccounts();
+    checkHealth();
+    setInterval(checkHealth, 20000);
+</script>
+</body>
+</html>
