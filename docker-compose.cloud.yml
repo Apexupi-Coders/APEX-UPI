@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: apex-zookeeper-cloud
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_4LW_COMMANDS_WHITELIST: "ruok"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: apex-kafka-cloud
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_RETENTION_HOURS: 1
+
+  redis:
+    image: redis:7-alpine
+    container_name: apex-redis-cloud
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: apex-postgres-cloud
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_DB: apexupi
+      POSTGRES_USER: apexupi
+      POSTGRES_PASSWORD: apexupi
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  wiremock:
+    image: wiremock/wiremock:3.3.1
+    container_name: apex-wiremock-cloud
+    ports:
+      - "9090:8080"
+    volumes:
+      - ./integration/wiremock:/home/wiremock
+    command: --global-response-templating --verbose
+
+  # --- MICROSERVICES ---
+
+  tpap-ingress-service:
+    build: 
+      context: ./services/tpap-ingress-service
+      dockerfile: Dockerfile
+    container_name: apex-ingress-cloud
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+      - postgres
+      - redis
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/apexupi
+      - SPRING_DATASOURCE_USERNAME=apexupi
+      - SPRING_DATASOURCE_PASSWORD=apexupi
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_REDIS_HOST=redis
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+
+  transaction-orchestrator:
+    build: 
+      context: ./services/transaction-orchestrator
+      dockerfile: Dockerfile
+    container_name: apex-orchestrator-cloud
+    ports:
+      - "8081:8081"
+    depends_on:
+      - kafka
+      - postgres
+      - redis
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/apexupi
+      - SPRING_DATASOURCE_USERNAME=apexupi
+      - SPRING_DATASOURCE_PASSWORD=apexupi
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_REDIS_HOST=redis
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - ADAPTER_URL=http://npci-adapter:8082
+      # Some standard config mapping just in case
+      - NPCI_ADAPTER_URL=http://npci-adapter:8082
+
+  npci-adapter:
+    build: 
+      context: ./services/npci-adapter
+      dockerfile: Dockerfile
+    container_name: apex-adapter-cloud
+    ports:
+      - "8082:8082"
+    depends_on:
+      - kafka
+      - wiremock
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - NPCI_BASE_URL=http://wiremock:8080

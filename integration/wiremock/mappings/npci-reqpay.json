@@ -1,0 +1,16 @@
+{
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/upi/ReqPay/1\\.0/.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/xml",
+      "X-UPI-Signature": "mock-signature-ok"
+    },
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<upi:ReqPay xmlns:upi=\"http://npci.org/upi/schema/\">\n  <Head ver=\"1.0\" ts=\"{{now}}\" orgId=\"DEMOPSP\" msgId=\"{{randomValue type='UUID'}}\"/>\n  <Txn id=\"TXN001\" type=\"PAY\" ts=\"{{now}}\">\n    <RespPay>\n      <Resp reqMsgId=\"{{request.pathSegments.[4]}}\" result=\"SUCCESS\" errCode=\"\">\n        <Ref type=\"PAYER\" seqNum=\"1\" addr=\"alice@apexupi\" settAmount=\"500.00\" settCurrency=\"INR\" approvalNum=\"ARN-{{randomValue length=6 type='NUMERIC'}}\"/>\n      </Resp>\n    </RespPay>\n  </Txn>\n</upi:ReqPay>",
+    "transformers": ["response-template"]
+  }
+}

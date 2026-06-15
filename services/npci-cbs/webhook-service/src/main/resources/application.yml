@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: webhook-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
+
+server:
+  port: 8085
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+webhook:
+  max-retries: 3
+  retry-backoff-ms: 1000
+
+logging:
+  level:
+    com.hpe.upi: INFO

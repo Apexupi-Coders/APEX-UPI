@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPCI Router — UPI Switch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #06080f;
+            --surface: #0d1117;
+            --border: #1a2535;
+            --accent: #4f9eff;
+            --accent2: #7c3aed;
+            --green: #22c55e;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --cyan: #06b6d4;
+            --text: #e2e8f0;
+            --muted: #4a6080;
+            --mono: 'Space Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+
+        .shell { display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 230px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .main { flex: 1; overflow-y: auto; }
+
+        /* Sidebar */
+        .brand { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+        .brand-tag { font-family: var(--mono); font-size: 9px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
+        .brand-name { font-size: 15px; font-weight: 600; color: var(--text); }
+        .brand-port { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        .nav { padding: 12px 8px; flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px; cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 500; transition: all 0.15s; margin-bottom: 2px; }
+        .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+        .nav-item.active { color: var(--accent); background: rgba(79,158,255,0.08); }
+        .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+        .status-panel { padding: 12px 14px; border-top: 1px solid var(--border); }
+        .status-label { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+        .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .status-name { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+        .pill { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+        .pill-up { background: rgba(34,197,94,0.15); color: var(--green); }
+        .pill-down { background: rgba(239,68,68,0.15); color: var(--red); }
+        .pill-checking { background: rgba(74,96,128,0.15); color: var(--muted); }
+
+        /* Pages */
+        .page { display: none; padding: 28px 32px; }
+        .page.active { display: block; }
+        .page-header { margin-bottom: 24px; }
+        .page-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+        .page-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+        /* Stats */
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .stat-label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+        .stat-value { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--text); }
+        .stat-value.blue { color: var(--accent); }
+        .stat-value.green { color: var(--green); }
+        .stat-value.red { color: var(--red); }
+        .stat-value.amber { color: var(--amber); }
+
+        /* Card */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+        .card-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+        .card-body { padding: 18px; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+        .data-table td { padding: 11px 14px; border-bottom: 1px solid rgba(26,37,53,0.7); color: var(--text); }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .mono { font-family: var(--mono); font-size: 11px; }
+
+        /* Tags */
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: var(--mono); }
+        .tag-green { background: rgba(34,197,94,0.1); color: var(--green); }
+        .tag-red { background: rgba(239,68,68,0.1); color: var(--red); }
+        .tag-amber { background: rgba(245,158,11,0.1); color: var(--amber); }
+        .tag-blue { background: rgba(79,158,255,0.1); color: var(--accent); }
+        .tag-cyan { background: rgba(6,182,212,0.1); color: var(--cyan); }
+        .tag-purple { background: rgba(124,58,237,0.1); color: #a78bfa; }
+
+        /* Buttons */
+        .btn { padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; font-family: var(--sans); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #3a8ef0; }
+        .btn-danger { background: var(--red); color: #fff; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .refresh-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; font-family: var(--mono); transition: all 0.15s; }
+        .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Form */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+        .field input, .field select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; color: var(--text); font-size: 13px; font-family: var(--sans); outline: none; transition: border 0.15s; }
+        .field input:focus, .field select:focus { border-color: var(--accent); }
+        .field select option { background: var(--surface); }
+
+        /* Response */
+        .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-family: var(--mono); font-size: 11px; color: var(--text); white-space: pre-wrap; max-height: 340px; overflow-y: auto; line-height: 1.7; }
+        .response-box.ok { border-color: rgba(34,197,94,0.25); }
+        .response-box.err { border-color: rgba(239,68,68,0.25); color: var(--red); }
+        .response-box.loading { color: var(--muted); }
+
+        /* Inflight */
+        .inflight-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
+        .inflight-row:last-child { border-bottom: none; }
+        .inflight-txn { font-family: var(--mono); font-size: 11px; color: var(--text); }
+        .inflight-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+        /* VPA lookup */
+        .vpa-result { background: var(--bg); border: 1px solid var(--accent); border-radius: 8px; padding: 18px; display: none; margin-top: 14px; }
+        .vpa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .vpa-field-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+        .vpa-field-value { font-family: var(--mono); font-size: 13px; color: var(--text); }
+
+        /* Protocol */
+        .proto-section { margin-top: 16px; }
+        .proto-header { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+        /* Endpoint list */
+        .endpoint-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: opacity 0.15s; }
+        .endpoint-row:last-child { border-bottom: none; }
+        .endpoint-row:hover { opacity: 0.75; }
+        .method-tag { font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; min-width: 42px; text-align: center; }
+        .method-get { background: rgba(34,197,94,0.15); color: var(--green); }
+        .method-post { background: rgba(79,158,255,0.15); color: var(--accent); }
+        .endpoint-path { font-family: var(--mono); font-size: 12px; color: var(--text); }
+
+        /* Pay result */
+        .pay-result-card { background: var(--bg); border-radius: 8px; padding: 16px; margin-top: 14px; display: none; }
+        .pay-txn-id { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+        .pay-status-big { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+        .pay-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 12px; }
+        .pay-meta-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+        .pay-meta-value { font-family: var(--mono); }
+
+        /* Scenario grid */
+        .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .scenario-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; cursor: pointer; text-align: left; transition: all 0.15s; }
+        .scenario-btn:hover { border-color: var(--accent); }
+        .scenario-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+        .scenario-desc { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="shell">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">
+            <div class="brand-tag">UPI Switch</div>
+            <div class="brand-name">NPCI Router</div>
+            <div class="brand-port">localhost:8082</div>
+        </div>
+
+        <nav class="nav">
+            <div class="nav-item active" onclick="nav(event,'pay')">
+                <span class="nav-icon">⟶</span> Send Payment
+            </div>
+            <div class="nav-item" onclick="nav(event,'scenarios')">
+                <span class="nav-icon">⊛</span> Test Scenarios
+            </div>
+            <div class="nav-item" onclick="nav(event,'inflight')">
+                <span class="nav-icon">◌</span> In-flight / History
+            </div>
+            <div class="nav-item" onclick="nav(event,'vpa')">
+                <span class="nav-icon">◎</span> VPA Registry
+            </div>
+            <div class="nav-item" onclick="nav(event,'protocol')">
+                <span class="nav-icon">⌥</span> Protocol Preview
+            </div>
+            <div class="nav-item" onclick="nav(event,'errorcodes')">
+                <span class="nav-icon">△</span> Error Codes
+            </div>
+            <div class="nav-item" onclick="nav(event,'endpoints')">
+                <span class="nav-icon">⌁</span> API Reference
+            </div>
+        </nav>
+
+        <div class="status-panel">
+            <div class="status-label">Health</div>
+            <div class="status-row">
+                <span class="status-name">npci-router</span>
+                <span class="pill pill-checking" id="health-pill">checking</span>
+            </div>
+            <div class="status-row">
+                <span class="status-name">kafka</span>
+                <span class="pill pill-checking" id="kafka-pill">checking</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Send Payment -->
+        <div id="page-pay" class="page active">
+            <div class="page-header">
+                <div class="page-title">Send Payment</div>
+                <div class="page-sub">POST /api/npci/test/pay → Kafka → CBS</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Payment Request</span></div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>Payer VPA</label>
+                            <select id="pay-payer">
+                                <option value="alice@sbi">alice@sbi — Alice Sharma</option>
+                                <option value="bob@hdfc">bob@hdfc — Bob Kumar</option>
+                                <option value="charlie@icici">charlie@icici — Charlie Mehta</option>
+                                <option value="diana@axis">diana@axis — Diana Patel</option>
+                                <option value="eve@kotak">eve@kotak — Eve Nair</option>
+                                <option value="frozen@hdfc">frozen@hdfc — Frozen ⚠</option>
+                                <option value="dormant@sbi">dormant@sbi — Dormant ⚠</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Payee VPA</label>
+                            <select id="pay-payee">
+                                <option value="bob@hdfc">bob@hdfc — Bob Kumar</option>
+                                <option value="alice@sbi">alice@sbi — Alice Sharma</option>
+                                <option value="charlie@icici">charlie@icici — Charlie Mehta</option>
+                                <option value="diana@axis">diana@axis — Diana Patel</option>
+                                <option value="eve@kotak">eve@kotak — Eve Nair</option>
+                                <option value="merchant@ybl">merchant@ybl — Test Merchant</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Amount (₹)</label>
+                            <input type="number" id="pay-amount" value="500" min="1">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: 1fr auto; align-items: end;">
+                        <div class="field">
+                            <label>Remarks</label>
+                            <input type="text" id="pay-remarks" value="Test payment" placeholder="Optional">
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="sendPayment()">Send Payment ⟶</button>
+                        </div>
+                    </div>
+
+                    <div class="pay-result-card" id="pay-result-card">
+                        <div class="pay-txn-id" id="pay-txn-id"></div>
+                        <div class="pay-status-big" id="pay-status-big"></div>
+                        <div class="pay-meta">
+                            <div><div class="pay-meta-label">Payer</div><div class="pay-meta-value" id="pay-r-payer"></div></div>
+                            <div><div class="pay-meta-label">Payee</div><div class="pay-meta-value" id="pay-r-payee"></div></div>
+                            <div><div class="pay-meta-label">Amount</div><div class="pay-meta-value" id="pay-r-amount"></div></div>
+                        </div>
+                    </div>
+                    <div class="response-box loading" id="pay-result" style="margin-top:14px;">Waiting for payment...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Scenarios -->
+        <div id="page-scenarios" class="page">
+            <div class="page-header">
+                <div class="page-title">Test Scenarios</div>
+                <div class="page-sub">Pre-built scenarios to test edge cases</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Run Scenario</span></div>
+                <div class="card-body">
+                    <div class="scenario-grid">
+                        <div class="scenario-btn" onclick="runScenario('normal')">
+                            <div class="scenario-title">✓ Normal Payment</div>
+                            <div class="scenario-desc">alice@sbi → bob@hdfc, ₹500</div>
+                        </div>
+                        <div class="scenario-btn" onclick="runScenario('large')">
+                            <div class="scenario-title">⚠ Large Amount</div>
+                            <div class="scenario-desc">alice@sbi → merchant@ybl, ₹9999</div>
+                        </div>
+                        <div class="scenario-btn" onclick="runScenario('frozen')">
+                            <div class="scenario-title">✕ Frozen Account</div>
+                            <div class="scenario-desc">frozen@hdfc → bob@hdfc, ₹100</div>
+                        </div>
+                        <div class="scenario-btn" onclick="runScenario('dormant')">
+                            <div class="scenario-title">✕ Dormant Account</div>
+                            <div class="scenario-desc">dormant@sbi → alice@sbi, ₹50</div>
+                        </div>
+                        <div class="scenario-btn" onclick="runScenario('insufficient')">
+                            <div class="scenario-title">✕ Insufficient Funds</div>
+                            <div class="scenario-desc">charlie@icici → alice@sbi, ₹99999</div>
+                        </div>
+                        <div class="scenario-btn" onclick="runScenario('self')">
+                            <div class="scenario-title">✕ Self Transfer</div>
+                            <div class="scenario-desc">alice@sbi → alice@sbi, ₹100</div>
+                        </div>
+                    </div>
+                    <div class="response-box loading" id="sc-result">Click a scenario above to run it</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inflight -->
+        <div id="page-inflight" class="page">
+            <div class="page-header">
+                <div class="page-title">In-flight / History</div>
+                <div class="page-sub">GET /api/npci/inflight</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">In-flight Transactions</span>
+                    <button class="refresh-btn" onclick="loadInflight()">↻ Refresh</button>
+                </div>
+                <div id="inflight-table"><div class="empty" style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Loading...</div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Transaction History</span>
+                    <button class="refresh-btn" onclick="loadInflight()">↻ Refresh</button>
+                </div>
+                <div id="history-table"><div class="empty" style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Loading...</div></div>
+            </div>
+        </div>
+
+        <!-- VPA Registry -->
+        <div id="page-vpa" class="page">
+            <div class="page-header">
+                <div class="page-title">VPA Registry</div>
+                <div class="page-sub">GET /api/npci/vpa/registry</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">VPA Lookup</span></div>
+                <div class="card-body">
+                    <div class="form-grid" style="grid-template-columns: 1fr auto; align-items: end;">
+                        <div class="field">
+                            <label>VPA to Lookup</label>
+                            <input type="text" id="vpa-input" value="alice@sbi" placeholder="e.g. alice@sbi">
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="lookupVpa()">Lookup</button>
+                        </div>
+                    </div>
+                    <div class="vpa-result" id="vpa-result">
+                        <div class="vpa-grid">
+                            <div><div class="vpa-field-label">VPA</div><div class="vpa-field-value" id="vr-vpa"></div></div>
+                            <div><div class="vpa-field-label">Account Name</div><div class="vpa-field-value" id="vr-name"></div></div>
+                            <div><div class="vpa-field-label">Account Number</div><div class="vpa-field-value" id="vr-acc"></div></div>
+                            <div><div class="vpa-field-label">IFSC</div><div class="vpa-field-value" id="vr-ifsc"></div></div>
+                            <div><div class="vpa-field-label">Bank Code</div><div class="vpa-field-value" id="vr-bank"></div></div>
+                            <div><div class="vpa-field-label">Status</div><div class="vpa-field-value" id="vr-status"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">All Registered VPAs</span>
+                    <button class="refresh-btn" onclick="loadRegistry()">↻ Load</button>
+                </div>
+                <div id="registry-table"><div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Click Load to fetch registry</div></div>
+            </div>
+        </div>
+
+        <!-- Protocol Preview -->
+        <div id="page-protocol" class="page">
+            <div class="page-header">
+                <div class="page-title">Protocol Preview</div>
+                <div class="page-sub">POST /api/npci/protocol/preview — ISO 8583 + NPCI XML</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Generate Protocol Message</span></div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>Payer VPA</label>
+                            <input type="text" id="proto-payer" value="alice@sbi">
+                        </div>
+                        <div class="field">
+                            <label>Payee VPA</label>
+                            <input type="text" id="proto-payee" value="bob@hdfc">
+                        </div>
+                        <div class="field">
+                            <label>Amount (₹)</label>
+                            <input type="number" id="proto-amount" value="500">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: 1fr auto; align-items: end;">
+                        <div class="field">
+                            <label>Operation</label>
+                            <select id="proto-op">
+                                <option value="DEBIT">DEBIT</option>
+                                <option value="CREDIT">CREDIT</option>
+                                <option value="REVERSAL">REVERSAL</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="previewProtocol()">Generate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="proto-result-card" style="display:none;">
+                <div class="card-header"><span class="card-title">ISO 8583 Message</span></div>
+                <div class="card-body">
+                    <div class="response-box" id="proto-iso"></div>
+                </div>
+            </div>
+
+            <div class="card" id="proto-xml-card" style="display:none;">
+                <div class="card-header"><span class="card-title">NPCI XML</span></div>
+                <div class="card-body">
+                    <div class="response-box" id="proto-xml"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Codes -->
+        <div id="page-errorcodes" class="page">
+            <div class="page-header">
+                <div class="page-title">UPI Error Codes</div>
+                <div class="page-sub">GET /api/npci/error-codes</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Error Code Reference</span>
+                    <button class="refresh-btn" onclick="loadErrorCodes()">↻ Fetch</button>
+                </div>
+                <div id="errorcodes-table"><div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Click Fetch to load</div></div>
+            </div>
+        </div>
+
+        <!-- API Reference -->
+        <div id="page-endpoints" class="page">
+            <div class="page-header">
+                <div class="page-title">API Reference</div>
+                <div class="page-sub">Click any endpoint to call it live</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">NPCI Endpoints</span></div>
+                <div class="card-body">
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/health','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/health</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/inflight','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/inflight</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/vpa/registry','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/vpa/registry</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/vpa/lookup/alice@sbi','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/vpa/lookup/{vpa}</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/error-codes','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/error-codes</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/test/health','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/test/health</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/test/accounts','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/test/accounts</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/protocol/iso8583/mti','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/protocol/iso8583/mti</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/protocol/iso8583/response-codes','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/protocol/iso8583/response-codes</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/api/npci/protocol/xml/sample','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/api/npci/protocol/xml/sample</span>
+                    </div>
+                    <div class="endpoint-row" onclick="quickGet('/actuator/health','endpoints-result')">
+                        <span class="method-tag method-get">GET</span>
+                        <span class="endpoint-path">/actuator/health</span>
+                    </div>
+                    <div class="endpoint-row" style="cursor:default; opacity:0.5;">
+                        <span class="method-tag method-post">POST</span>
+                        <span class="endpoint-path">/api/npci/test/pay — use Send Payment tab</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Response</span></div>
+                <div class="card-body">
+                    <div class="response-box" id="endpoints-result">Click any endpoint above to call it live</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const BASE = ''; // same-origin: served from :8082
+
+    // ── Navigation ──
+    function nav(e, id) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + id).classList.add('active');
+        if (id === 'inflight') loadInflight();
+        if (id === 'vpa') loadRegistry();
+        if (id === 'errorcodes') loadErrorCodes();
+    }
+
+    // ── HTTP helpers ──
+    async function api(path, opts = {}) {
+        const r = await fetch(BASE + path, opts);
+        const text = await r.text();
+        return { ok: r.ok, status: r.status, text, json: () => JSON.parse(text) };
+    }
+
+    function fmt(text) {
+        try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return text; }
+    }
+
+    function setBox(id, text, state) {
+        const el = document.getElementById(id);
+        el.className = 'response-box ' + (state || '');
+        el.textContent = fmt(text);
+    }
+
+    async function quickGet(path, boxId) {
+        setBox(boxId, 'Loading...', 'loading');
+        try {
+            const r = await api(path);
+            setBox(boxId, r.text, r.ok ? 'ok' : 'err');
+        } catch(e) {
+            setBox(boxId, e.message, 'err');
+        }
+    }
+
+    // ── Send Payment ──
+    async function sendPayment() {
+        const body = {
+            payerVpa: document.getElementById('pay-payer').value,
+            payeeVpa: document.getElementById('pay-payee').value,
+            amount: document.getElementById('pay-amount').value,
+            remarks: document.getElementById('pay-remarks').value
+        };
+        setBox('pay-result', 'Sending payment...', 'loading');
+        document.getElementById('pay-result-card').style.display = 'none';
+        try {
+            const r = await api('/api/npci/test/pay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const d = r.json();
+            setBox('pay-result', r.text, r.ok ? 'ok' : 'err');
+
+            if (r.ok && d.txnId) {
+                const card = document.getElementById('pay-result-card');
+                card.style.display = 'block';
+                card.style.borderLeft = `3px solid ${d.status === 'SUCCESS' ? 'var(--green)' : 'var(--red)'}`;
+                document.getElementById('pay-txn-id').textContent = d.txnId;
+                const statusEl = document.getElementById('pay-status-big');
+                const sc = d.status === 'SUCCESS' ? 'var(--green)' : 'var(--red)';
+                statusEl.textContent = d.status;
+                statusEl.style.color = sc;
+                document.getElementById('pay-r-payer').textContent = d.payerVpa || body.payerVpa;
+                document.getElementById('pay-r-payee').textContent = d.payeeVpa || body.payeeVpa;
+                document.getElementById('pay-r-amount').textContent = '₹' + parseFloat(body.amount).toLocaleString('en-IN');
+            }
+        } catch(e) {
+            setBox('pay-result', e.message, 'err');
+        }
+    }
+
+    // ── Test Scenarios ──
+    const scenarios = {
+        normal:       { payerVpa: 'alice@sbi',    payeeVpa: 'bob@hdfc',      amount: '500',   remarks: 'Normal payment' },
+        large:        { payerVpa: 'alice@sbi',    payeeVpa: 'merchant@ybl',  amount: '9999',  remarks: 'Large amount' },
+        frozen:       { payerVpa: 'frozen@hdfc',  payeeVpa: 'bob@hdfc',      amount: '100',   remarks: 'Frozen account test' },
+        dormant:      { payerVpa: 'dormant@sbi',  payeeVpa: 'alice@sbi',     amount: '50',    remarks: 'Dormant account test' },
+        insufficient: { payerVpa: 'charlie@icici',payeeVpa: 'alice@sbi',     amount: '99999', remarks: 'Insufficient funds test' },
+        self:         { payerVpa: 'alice@sbi',    payeeVpa: 'alice@sbi',     amount: '100',   remarks: 'Self transfer test' }
+    };
+
+    async function runScenario(name) {
+        const sc = scenarios[name];
+        setBox('sc-result', 'Running scenario: ' + name + '...', 'loading');
+        try {
+            const r = await api('/api/npci/test/pay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sc)
+            });
+            setBox('sc-result', r.text, r.ok ? 'ok' : 'err');
+        } catch(e) {
+            setBox('sc-result', e.message, 'err');
+        }
+    }
+
+    // ── Inflight ──
+    async function loadInflight() {
+        document.getElementById('inflight-table').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Loading...</div>';
+        document.getElementById('history-table').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Loading...</div>';
+        try {
+            const r = await api('/api/npci/inflight');
+            const d = r.json();
+            const inflight = d.inflight || {};
+            const history = d.history || [];
+
+            // Inflight
+            const inflightKeys = Object.keys(inflight);
+            if (!inflightKeys.length) {
+                document.getElementById('inflight-table').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No in-flight transactions</div>';
+            } else {
+                const rows = inflightKeys.map(k => {
+                    const t = inflight[k];
+                    return `<tr>
+            <td class="mono">${k}</td>
+            <td class="mono">${t.payerVpa||'—'} → ${t.payeeVpa||'—'}</td>
+            <td class="mono">₹${parseFloat(t.amount||0).toLocaleString('en-IN')}</td>
+            <td><span class="tag tag-amber">IN-FLIGHT</span></td>
+          </tr>`;
+                }).join('');
+                document.getElementById('inflight-table').innerHTML = `
+          <table class="data-table">
+            <thead><tr><th>Transaction ID</th><th>Route</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+            }
+
+            // History
+            if (!history.length) {
+                document.getElementById('history-table').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No transaction history yet</div>';
+            } else {
+                const rows = [...history].reverse().map(t => {
+                    const sc = t.status === 'SUCCESS' ? 'tag-green' : t.status === 'FAILED' ? 'tag-red' : 'tag-amber';
+                    return `<tr>
+            <td class="mono" style="font-size:10px">${t.txnId||'—'}</td>
+            <td class="mono">${t.payerVpa||'—'}</td>
+            <td class="mono">${t.payeeVpa||'—'}</td>
+            <td class="mono">₹${parseFloat(t.amount||0).toLocaleString('en-IN')}</td>
+            <td><span class="tag ${sc}">${t.status||'—'}</span></td>
+          </tr>`;
+                }).join('');
+                document.getElementById('history-table').innerHTML = `
+          <table class="data-table">
+            <thead><tr><th>Transaction ID</th><th>Payer</th><th>Payee</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+            }
+        } catch(e) {
+            document.getElementById('inflight-table').innerHTML = `<div style="padding:20px;text-align:center;color:var(--red);font-size:13px;">${e.message}</div>`;
+        }
+    }
+
+    // ── VPA Lookup ──
+    async function lookupVpa() {
+        const vpa = document.getElementById('vpa-input').value.trim();
+        document.getElementById('vpa-result').style.display = 'none';
+        try {
+            const r = await api('/api/npci/vpa/lookup/' + encodeURIComponent(vpa));
+            if (r.ok) {
+                const d = r.json();
+                document.getElementById('vr-vpa').textContent = d.vpa;
+                document.getElementById('vr-name').textContent = d.accountName;
+                document.getElementById('vr-acc').textContent = d.accountNumber;
+                document.getElementById('vr-ifsc').textContent = d.ifsc;
+                document.getElementById('vr-bank').textContent = d.bankCode;
+                const sc = d.status === 'ACTIVE' ? 'tag-green' : d.status === 'FROZEN' ? 'tag-red' : 'tag-amber';
+                document.getElementById('vr-status').innerHTML = `<span class="tag ${sc}">${d.status}</span>`;
+                document.getElementById('vpa-result').style.display = 'block';
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    // ── Registry ──
+    async function loadRegistry() {
+        document.getElementById('registry-table').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Loading...</div>';
+        try {
+            const r = await api('/api/npci/vpa/registry');
+            const d = r.json();
+            const accounts = d.accounts || [];
+            if (!accounts.length) {
+                document.getElementById('registry-table').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No accounts found</div>';
+                return;
+            }
+            const rows = accounts.map(a => {
+                const sc = a.status === 'ACTIVE' ? 'tag-green' : a.status === 'FROZEN' ? 'tag-red' : 'tag-amber';
+                return `<tr>
+          <td class="mono">${a.vpa}</td>
+          <td>${a.accountName}</td>
+          <td class="mono">${a.ifsc}</td>
+          <td class="mono">${a.bankCode}</td>
+          <td><span class="tag ${sc}">${a.status}</span></td>
+        </tr>`;
+            }).join('');
+            document.getElementById('registry-table').innerHTML = `
+        <table class="data-table">
+          <thead><tr><th>VPA</th><th>Name</th><th>IFSC</th><th>Bank</th><th>Status</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+        } catch(e) {
+            document.getElementById('registry-table').innerHTML = `<div style="padding:20px;text-align:center;color:var(--red);font-size:13px;">${e.message}</div>`;
+        }
+    }
+
+    // ── Protocol Preview ──
+    async function previewProtocol() {
+        document.getElementById('proto-result-card').style.display = 'none';
+        document.getElementById('proto-xml-card').style.display = 'none';
+        const body = {
+            payerVpa: document.getElementById('proto-payer').value,
+            payeeVpa: document.getElementById('proto-payee').value,
+            amount: document.getElementById('proto-amount').value,
+            operation: document.getElementById('proto-op').value
+        };
+        try {
+            const r = await api('/api/npci/protocol/preview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const d = r.json();
+            if (d.iso8583) {
+                document.getElementById('proto-iso').textContent = fmt(JSON.stringify(d.iso8583));
+                document.getElementById('proto-result-card').style.display = 'block';
+            }
+            if (d.npciXml) {
+                document.getElementById('proto-xml').textContent = d.npciXml;
+                document.getElementById('proto-xml-card').style.display = 'block';
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    // ── Error Codes ──
+    async function loadErrorCodes() {
+        document.getElementById('errorcodes-table').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">Loading...</div>';
+        try {
+            const r = await api('/api/npci/error-codes');
+            const d = r.json();
+            const codes = d.errorCodes || {};
+            const rows = Object.entries(codes).map(([code, desc]) => `
+        <tr>
+          <td><span class="tag tag-red">${code}</span></td>
+          <td>${desc}</td>
+        </tr>`).join('');
+            document.getElementById('errorcodes-table').innerHTML = `
+        <table class="data-table">
+          <thead><tr><th>Code</th><th>Description</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+        } catch(e) {
+            document.getElementById('errorcodes-table').innerHTML = `<div style="padding:20px;text-align:center;color:var(--red);font-size:13px;">${e.message}</div>`;
+        }
+    }
+
+    // ── Health Check ──
+    async function checkHealth() {
+        try {
+            const r = await fetch('/actuator/health');
+            const p = document.getElementById('health-pill');
+            p.textContent = r.ok ? 'UP' : 'DOWN';
+            p.className = 'pill ' + (r.ok ? 'pill-up' : 'pill-down');
+        } catch {
+            const p = document.getElementById('health-pill');
+            p.textContent = 'DOWN'; p.className = 'pill pill-down';
+        }
+
+        try {
+            const r = await fetch('/api/npci/health');
+            const kp = document.getElementById('kafka-pill');
+            kp.textContent = r.ok ? 'UP' : 'DOWN';
+            kp.className = 'pill ' + (r.ok ? 'pill-up' : 'pill-down');
+        } catch {
+            const kp = document.getElementById('kafka-pill');
+            kp.textContent = 'DOWN'; kp.className = 'pill pill-down';
+        }
+    }
+
+    // ── Init ──
+    checkHealth();
+    setInterval(checkHealth, 20000);
+</script>
+</body>
+</html>
