@@ -24,9 +24,12 @@ public class TransactionEntity {
     @Column(name = "tr", nullable = false, length = 50)
     private String tr;
 
+<<<<<<< HEAD
     @Column(name = "payer_vpa", length = 100)
     private String payerVpa;
 
+=======
+>>>>>>> c24d976 (Initial commit)
     @Column(name = "pa", nullable = false, length = 100)
     private String pa;
 
@@ -45,7 +48,11 @@ public class TransactionEntity {
     @Column(name = "cu", length = 5)
     private String cu;
 
+<<<<<<< HEAD
     @Column(name = "mode", length = 5)
+=======
+    @Column(name = "mode", length = 50)
+>>>>>>> c24d976 (Initial commit)
     private String mode;
 
     @Column(name = "mid", length = 50)
@@ -96,7 +103,10 @@ public class TransactionEntity {
         TransactionContext ctx = new TransactionContext();
         ctx.setTid(this.tid);
         ctx.setTr(this.tr);
+<<<<<<< HEAD
         ctx.setPayerVpa(this.payerVpa);
+=======
+>>>>>>> c24d976 (Initial commit)
         ctx.setPa(this.pa);
         ctx.setPn(this.pn);
         ctx.setMc(this.mc);
@@ -116,9 +126,18 @@ public class TransactionEntity {
         ctx.setFlowDirection(this.flowDirection);
         ctx.setCreatedAt(this.createdAt);
         ctx.setUpdatedAt(this.updatedAt);
+<<<<<<< HEAD
         return ctx;
     }
 
+=======
+        ctx.setCorrelationId(this.correlationId);
+        ctx.setEventId(this.eventId);
+        return ctx;
+    }
+
+
+>>>>>>> c24d976 (Initial commit)
     /**
      * Creates an entity from a TransactionContext (for persistence).
      */
@@ -126,7 +145,10 @@ public class TransactionEntity {
         TransactionEntity entity = new TransactionEntity();
         entity.tid = ctx.getTid();
         entity.tr = ctx.getTr();
+<<<<<<< HEAD
         entity.payerVpa = ctx.getPayerVpa();
+=======
+>>>>>>> c24d976 (Initial commit)
         entity.pa = ctx.getPa();
         entity.pn = ctx.getPn();
         entity.mc = ctx.getMc();
@@ -144,14 +166,33 @@ public class TransactionEntity {
         entity.requiresPasscode = ctx.isRequiresPasscode();
         entity.flowType = ctx.getFlowType();
         entity.flowDirection = ctx.getFlowDirection();
+<<<<<<< HEAD
+=======
+        entity.correlationId = ctx.getCorrelationId();
+        entity.eventId = ctx.getEventId();
+>>>>>>> c24d976 (Initial commit)
         entity.createdAt = ctx.getCreatedAt();
         entity.updatedAt = ctx.getUpdatedAt();
         return entity;
     }
 
+<<<<<<< HEAD
     // --- Getters and Setters ---
     // Used by DataCryptoService (encrypt/decrypt PII), ReconciliationService, etc.
 
+=======
+
+    @Column(name = "correlation_id", length = 64)
+    private String correlationId;
+
+    @Column(name = "event_id", length = 64)
+    private String eventId;
+
+    // --- Getters and Setters ---
+    // Used by DataCryptoService (encrypt/decrypt PII), ReconciliationService, etc.
+
+
+>>>>>>> c24d976 (Initial commit)
     public String getTid() {
         return tid;
     }
@@ -160,6 +201,7 @@ public class TransactionEntity {
         return tr;
     }
 
+<<<<<<< HEAD
     public String getPayerVpa() {
         return payerVpa;
     }
@@ -168,6 +210,8 @@ public class TransactionEntity {
         this.payerVpa = payerVpa;
     }
 
+=======
+>>>>>>> c24d976 (Initial commit)
     public String getPa() {
         return pa;
     }

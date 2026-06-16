@@ -2,6 +2,10 @@ package com.pspswitch.orchestrator.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+<<<<<<< HEAD
+=======
+import com.pspswitch.orchestrator.exception.ValidationException;
+>>>>>>> c24d976 (Initial commit)
 import com.pspswitch.orchestrator.model.UpiPaymentRequest;
 import com.pspswitch.orchestrator.orchestrator.TransactionOrchestrator;
 import org.slf4j.Logger;
@@ -9,6 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> c24d976 (Initial commit)
 /**
  * Kafka Consumer — consumes payment requests from the Ingress Service.
  *
@@ -43,6 +53,7 @@ public class PaymentRequestConsumer {
      * Message format: JSON-serialized UpiPaymentRequest
      * Consumer group: psp-orchestrator (configured in application.properties)
      */
+<<<<<<< HEAD
     @KafkaListener(topics = "${app.kafka.topic.payment-requests}", groupId = "psp-orchestrator")
     public void consume(String message) {
         try {
@@ -87,14 +98,126 @@ public class PaymentRequestConsumer {
             if (result.isDuplicate()) {
                 log.info("[KAFKA_CONSUMER] tr={} | DUPLICATE | Skipped (already processed)",
                         request.getTr());
+=======
+    @KafkaListener(topics = {
+            "psp.payment.initiate.request",
+            "psp.balance.inquiry.request"
+    }, groupId = "psp-orchestrator")
+    public void consume(String message) {
+
+        try {
+            log.info("[KAFKA_CONSUMER] Received message from topic | length={}", message.length());
+
+            // TPAP payload uses external field names:
+            // txnId, payerVpa, payeeVpa, amount, currency, txnType, mcc
+            // while UpiPaymentRequest expects:
+            // tr, pa, pn, am, cu, mode, mc
+            // Using JsonNode first allows explicit, validated mapping.
+            JsonNode root = objectMapper.readTree(message);
+
+            // TPAP publishes an envelope: { ..., "data": { txnId, payerVpa, ... } }
+            // Some producers may still send a flat payload. Support both.
+            JsonNode dataNode = root.hasNonNull("data") ? root.get("data") : root;
+
+            UpiPaymentRequest request = mapTpapPayloadToUpiPaymentRequest(dataNode);
+
+
+            log.info("[KAFKA_CONSUMER] Mapped payload | tr={} pa={} pn={} am={} cu={} mode={} mc={} tid={}",
+                    request.getTr(), request.getPa(), request.getPn(), request.getAm(), request.getCu(),
+                    request.getMode(), request.getMc(), request.getTid());
+
+            // Fail fast before orchestration to avoid NPE paths.
+            validateMappedRequest(request);
+
+            TransactionOrchestrator.OrchestratorResult result = orchestrator.orchestrate(request);
+
+            if (result.isDuplicate()) {
+                log.info("[KAFKA_CONSUMER] tr={} | DUPLICATE | Skipped (already processed)", request.getTr());
+>>>>>>> c24d976 (Initial commit)
             } else {
                 log.info("[KAFKA_CONSUMER] tr={} | txnId={} | ACCEPTED | Saga initiated",
                         request.getTr(), result.getResponse().getTxnId());
             }
 
+<<<<<<< HEAD
+=======
+        } catch (ValidationException ve) {
+            log.warn("[KAFKA_CONSUMER] Rejected malformed payload | reason={}", ve.getMessage());
+>>>>>>> c24d976 (Initial commit)
         } catch (Exception e) {
             log.error("[KAFKA_CONSUMER] Failed to process message: {}", e.getMessage(), e);
             // In production: send to dead-letter topic for manual review
         }
     }
+<<<<<<< HEAD
 }
+=======
+
+    private UpiPaymentRequest mapTpapPayloadToUpiPaymentRequest(JsonNode root) {
+        UpiPaymentRequest req = new UpiPaymentRequest();
+
+        req.setTr(text(root, "txnId"));
+        req.setPa(text(root, "payerVpa"));
+        req.setPn(text(root, "payeeVpa"));
+
+        if (root.hasNonNull("amount")) {
+            // Prefer numeric if present; fallback to string parsing.
+            try {
+                JsonNode amountNode = root.get("amount");
+                if (amountNode == null || amountNode.isNull()) {
+                    req.setAm(null);
+                } else if (amountNode.isNumber()) {
+                    req.setAm(amountNode.decimalValue());
+                } else {
+                    String amountText = amountNode.asText();
+                    req.setAm(amountText == null || amountText.isBlank() ? null : new java.math.BigDecimal(amountText));
+                }
+            } catch (Exception e) {
+                // Leave null; validation will reject with a clear reason.
+                req.setAm(null);
+            }
+
+        }
+
+        req.setCu(text(root, "currency"));
+        req.setMode(text(root, "txnType"));
+        req.setMc(text(root, "mcc"));
+
+        return req;
+    }
+
+    private void validateMappedRequest(UpiPaymentRequest request) {
+        // Mirror the orchestrator's critical fields early.
+
+        if (request.getTr() == null) {
+            throw new ValidationException("Missing txnId (mapped to tr)");
+        }
+        if (request.getPa() == null) {
+            throw new ValidationException("Missing payerVpa (mapped to pa)");
+        }
+        if (request.getPn() == null) {
+            throw new ValidationException("Missing payeeVpa (mapped to pn)");
+        }
+        if (request.getAm() == null) {
+            throw new ValidationException("Missing amount (mapped to am)");
+        }
+        if (request.getCu() == null) {
+            throw new ValidationException("Missing currency (mapped to cu)");
+        }
+        if (request.getMode() == null) {
+            throw new ValidationException("Missing txnType (mapped to mode)");
+        }
+        if (request.getMc() == null) {
+            throw new ValidationException("Missing mcc (mapped to mc)");
+        }
+    }
+
+    private String text(JsonNode root, String field) {
+        JsonNode n = root.get(field);
+        if (n == null || n.isNull()) return null;
+        String v = n.asText();
+        return v == null || v.isBlank() ? null : v;
+    }
+}
+
+>>>>>>> c24d976 (Initial commit)

@@ -90,7 +90,13 @@ public class NpciAdapterService {
         // Build XML
         String xml = xmlBuilderService.buildReqPay(
                 txnId, msgId, event.getPayerVpa(), event.getPayeeVpa(),
+<<<<<<< HEAD
                 event.getAmount(), encryptedMpin, orgId);
+=======
+                event.getAmount() != null ? event.getAmount().toPlainString() : null,
+                encryptedMpin, orgId);
+
+>>>>>>> c24d976 (Initial commit)
         log.info("[NPCI-ADAPTER] ReqPay XML built | txnId={}", txnId);
 
         // Sign
@@ -106,6 +112,7 @@ public class NpciAdapterService {
                     new HttpEntity<>(xml, buildHeaders(signature)), String.class);
 
             log.info("[NPCI-ADAPTER] Ack received from NPCI | txnId={} | ack={}", txnId, response.getBody());
+<<<<<<< HEAD
             
             if (response.getBody() != null && response.getBody().contains("<RespPay>")) {
                 log.info("[NPCI-ADAPTER] Auto-processing RespPay from mock synchronous response | txnId={}", txnId);
@@ -113,6 +120,9 @@ public class NpciAdapterService {
             } else {
                 log.info("[NPCI-ADAPTER] Waiting for RespPay callback | txnId={}", txnId);
             }
+=======
+            log.info("[NPCI-ADAPTER] Waiting for RespPay callback | txnId={}", txnId);
+>>>>>>> c24d976 (Initial commit)
 
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             log.error("[NPCI-ADAPTER] NPCI HTTP error on ReqPay | txnId={} | status={}",

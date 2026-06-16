@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: operations-dashboard-api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  monitoring:
+    kafka:
+      bootstrapServers: localhost:9092
+      topics:
+        npciOutboundRequest: npci.outbound.request
+        npciInboundResponse: npci.inbound.response
+      consumer:
+        groupId: dashboard-monitor-group
+

@@ -14,11 +14,32 @@ import java.time.Instant;
 public class TransactionContext {
 
     // --- Core identifiers ---
+<<<<<<< HEAD
     private String tid; // PSP-generated transaction ID (correlation ID)
     private String tr; // Transaction reference from request
     private String payerVpa; // Payer UPI ID
     private String pa; // Payee UPI ID
     private String pn; // Payee name
+=======
+    private String tid; // PSP-generated transaction ID (also used as correlation key for NPCI events)
+    private String tr; // Transaction reference from request
+    private String pa; // Payee UPI ID
+    private String pn; // Payee name
+
+    // --- Correlation / tracing ---
+    /**
+     * Correlation ID propagated from upstream via Kafka headers.
+     * If absent, we generate one at ingress-consumption time.
+     */
+    private String correlationId;
+
+    /**
+     * Event ID propagated from upstream via Kafka headers.
+     * If absent, we generate one at ingress-consumption time.
+     */
+    private String eventId;
+
+>>>>>>> c24d976 (Initial commit)
     private String mc; // Merchant category code
     private BigDecimal am; // Amount
     private BigDecimal mam; // Minimum amount
@@ -66,6 +87,7 @@ public class TransactionContext {
         this.tr = tr;
     }
 
+<<<<<<< HEAD
     public String getPayerVpa() {
         return payerVpa;
     }
@@ -74,6 +96,8 @@ public class TransactionContext {
         this.payerVpa = payerVpa;
     }
 
+=======
+>>>>>>> c24d976 (Initial commit)
     public String getPa() {
         return pa;
     }
@@ -215,6 +239,26 @@ public class TransactionContext {
         return updatedAt;
     }
 
+<<<<<<< HEAD
+=======
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+
+>>>>>>> c24d976 (Initial commit)
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
     }

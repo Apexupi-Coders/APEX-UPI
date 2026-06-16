@@ -1,0 +1,25 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/<db>
+    username: <user>
+    password: <pass>
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: validate
+    open-in-view: false
+
+app:
+  monitoring:
+    kafka:
+      bootstrapServers: localhost:9092
+      consumer:
+        groupId: dashboard-monitor-group
+      topics:
+        npciOutboundRequest: npci.outbound.request
+        npciInboundResponse: npci.inbound.response
+

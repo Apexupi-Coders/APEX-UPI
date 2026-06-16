@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  engine-recovery:
+    platform: linux/amd64
+    build: .
+    container_name: engine-recovery
+    ports:
+      - "8083:8083"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      NPCI_INBOUND_TOPIC: npci.inbound.response
+
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: temp-recov-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+  redis:
+    image: redis:7-alpine
+    container_name: temp-recov-redis
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: temp-recov-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+

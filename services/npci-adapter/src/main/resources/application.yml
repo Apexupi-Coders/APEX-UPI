@@ -1,6 +1,10 @@
 server:
   port: 8081
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> c24d976 (Initial commit)
 spring:
   application:
     name: npci-adapter

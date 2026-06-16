@@ -5,9 +5,15 @@ spring:
   application:
     name: tpap-ingress-service
   datasource:
+<<<<<<< HEAD
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:15432}/${POSTGRES_DB:apexupi}
     username: ${POSTGRES_USER:apexupi}
     password: ${POSTGRES_PASSWORD:apexupi}
+=======
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:tpap_ingress}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+>>>>>>> c24d976 (Initial commit)
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -26,7 +32,11 @@ spring:
       acks: all
       retries: 3
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+<<<<<<< HEAD
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+=======
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+>>>>>>> c24d976 (Initial commit)
   jackson:
     deserialization:
       fail-on-unknown-properties: true

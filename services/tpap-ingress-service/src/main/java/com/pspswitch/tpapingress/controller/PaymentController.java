@@ -27,7 +27,10 @@ public class PaymentController {
 
     private final KafkaPublisherService kafkaPublisher;
     private final IdempotencyService idempotencyService;
+<<<<<<< HEAD
     private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+=======
+>>>>>>> c24d976 (Initial commit)
 
     private static final String AMOUNT_PATTERN = "^\\d+(\\.\\d{1,2})?$";
     private static final String REMARKS_PATTERN = "^[a-zA-Z0-9 ]*$";
@@ -46,6 +49,7 @@ public class PaymentController {
         }
         validateTxnId(request.getTxnId(), tpapId);
 
+<<<<<<< HEAD
         // DEMO FEATURE: Reject in Ingress but explicitly save to DB so Dashboard can see it!
         if (request.getPayerVpa() == null || request.getPayerVpa().trim().isEmpty()) {
             saveRejectionToDb(request, "Rejected at Ingress: Payer VPA is required");
@@ -54,6 +58,10 @@ public class PaymentController {
         }
 
         // Validate other required fields
+=======
+        // Validate other required fields
+        validateRequired(request.getPayerVpa(), "payerVpa");
+>>>>>>> c24d976 (Initial commit)
         validateRequired(request.getPayeeVpa(), "payeeVpa");
         validateRequired(request.getCurrency(), "currency");
         validateRequired(request.getEncryptedPin(), "encryptedPin");
@@ -61,21 +69,36 @@ public class PaymentController {
         validateRequired(request.getTxnType(), "txnType");
 
         // Validate VPAs
+<<<<<<< HEAD
         validateVpa(request.getPayeeVpa());
 
         // Payer != Payee
         if (request.getPayerVpa() != null && request.getPayerVpa().equalsIgnoreCase(request.getPayeeVpa())) {
+=======
+        validateVpa(request.getPayerVpa());
+        validateVpa(request.getPayeeVpa());
+
+        // Payer != Payee
+        if (request.getPayerVpa().equalsIgnoreCase(request.getPayeeVpa())) {
+>>>>>>> c24d976 (Initial commit)
             throw new RequestValidationException("PAYER_PAYEE_SAME",
                     "Payer VPA must differ from Payee VPA");
         }
 
         // Validate amount (null → MISSING, empty/invalid → INVALID_AMOUNT)
         if (request.getAmount() == null) {
+<<<<<<< HEAD
             saveRejectionToDb(request, "Field 'amount' is required");
             throw new RequestValidationException("MISSING_REQUIRED_FIELD",
                     "Field 'amount' is required", "amount");
         }
         validateAmount(request.getAmount(), request);
+=======
+            throw new RequestValidationException("MISSING_REQUIRED_FIELD",
+                    "Field 'amount' is required", "amount");
+        }
+        validateAmount(request.getAmount());
+>>>>>>> c24d976 (Initial commit)
 
         // Validate currency
         if (!"INR".equals(request.getCurrency())) {
@@ -156,25 +179,37 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
+<<<<<<< HEAD
     private void validateAmount(String amountStr, PaymentInitiateRequest request) {
         if (!amountStr.matches(AMOUNT_PATTERN)) {
             saveRejectionToDb(request, "Amount must be a positive number with at most 2 decimal places");
+=======
+    private void validateAmount(String amountStr) {
+        if (!amountStr.matches(AMOUNT_PATTERN)) {
+>>>>>>> c24d976 (Initial commit)
             throw new RequestValidationException("INVALID_AMOUNT",
                     "Amount must be a positive number with at most 2 decimal places", "amount");
         }
         try {
             BigDecimal amount = new BigDecimal(amountStr);
             if (amount.compareTo(MIN_AMOUNT) < 0 || amount.compareTo(MAX_AMOUNT) > 0) {
+<<<<<<< HEAD
                 saveRejectionToDb(request, "Amount must be between 1.00 and 100000.00");
+=======
+>>>>>>> c24d976 (Initial commit)
                 throw new RequestValidationException("INVALID_AMOUNT",
                         "Amount must be between 1.00 and 100000.00", "amount");
             }
         } catch (NumberFormatException e) {
+<<<<<<< HEAD
             saveRejectionToDb(request, "Amount must be a valid number");
+=======
+>>>>>>> c24d976 (Initial commit)
             throw new RequestValidationException("INVALID_AMOUNT",
                     "Amount must be a valid number", "amount");
         }
     }
+<<<<<<< HEAD
 
     private void saveRejectionToDb(PaymentInitiateRequest request, String reason) {
         try {
@@ -193,4 +228,6 @@ public class PaymentController {
             // Ignore DB errors during edge rejection logging
         }
     }
+=======
+>>>>>>> c24d976 (Initial commit)
 }

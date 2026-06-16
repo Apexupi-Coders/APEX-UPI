@@ -34,9 +34,12 @@ public class GlobalExceptionHandler {
                         List.of(ErrorDetail.builder().field(ex.getField()).issue(ex.getMessage()).build()) :
                         null)
                 .build();
+<<<<<<< HEAD
                 
         log.warn("[INGRESS] REJECTED | 400 Bad Request | code={} | reason={}", ex.getErrorCode(), ex.getMessage());
         
+=======
+>>>>>>> c24d976 (Initial commit)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
@@ -74,6 +77,7 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
+<<<<<<< HEAD
     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(org.springframework.web.bind.MethodArgumentNotValidException ex) {
         String errorMsg = ex.getBindingResult().getFieldErrors().stream()
@@ -85,6 +89,8 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", errorMsg);
     }
 
+=======
+>>>>>>> c24d976 (Initial commit)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMalformedJson(HttpMessageNotReadableException ex) {
         return buildError(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_BODY",

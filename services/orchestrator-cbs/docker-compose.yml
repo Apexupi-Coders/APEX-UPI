@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  orchestrator-cbs:
+    platform: linux/amd64
+    build: .
+    container_name: orchestrator-cbs
+    ports:
+      - "8082:8082"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      NPCI_ADAPTER_BASE_URL: http://localhost:8081
+      CBS_BASE_URL: http://localhost:8083
+      PSP_PAYMENT_TOPIC: psp.payment.initiate.request
+      PSP_BALANCE_TOPIC: psp.balance.inquiry.request
+      NPCI_OUTBOUND_TOPIC: npci.outbound.request
+      NPCI_INBOUND_TOPIC: npci.inbound.response
+      PSP_AUDIT_TOPIC: psp.audit.events
+
+    depends_on:
+      - kafka
+      - redis
+
+  # Optional: if you run this compose alone, you can bring kafka/redis via an outer compose.
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: temp-orc-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+  redis:
+    image: redis:7-alpine
+    container_name: temp-orc-redis
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: temp-orc-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+

@@ -187,6 +187,7 @@ public class ControlController {
         infra.put("cryptoEnabled", dataCryptoService.isCryptoEnabled());
         status.put("infrastructure", infra);
 
+<<<<<<< HEAD
         // Transactions list
         java.util.List<Map<String, Object>> dashboardTxns = stateService.getAllTransactions().stream().map(ctx -> {
             Map<String, Object> map = new LinkedHashMap<>();
@@ -200,6 +201,8 @@ public class ControlController {
         }).collect(java.util.stream.Collectors.toList());
         status.put("transactions", dashboardTxns);
 
+=======
+>>>>>>> c24d976 (Initial commit)
         return ResponseEntity.ok(status);
     }
 }

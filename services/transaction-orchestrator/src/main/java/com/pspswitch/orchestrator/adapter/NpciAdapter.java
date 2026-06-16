@@ -1,8 +1,13 @@
 package com.pspswitch.orchestrator.adapter;
 
+<<<<<<< HEAD
 import com.pspswitch.orchestrator.service.NpciCallbackHandler;
 import com.pspswitch.orchestrator.model.NpciCallbackPayload;
 import com.pspswitch.orchestrator.model.NpciInboundResponseEvent;
+=======
+import com.pspswitch.orchestrator.controller.WebhookController;
+import com.pspswitch.orchestrator.model.NpciCallbackPayload;
+>>>>>>> c24d976 (Initial commit)
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -37,7 +42,11 @@ public class NpciAdapter {
     private static final Logger log = LoggerFactory.getLogger(NpciAdapter.class);
     private static final Random RANDOM = new Random();
 
+<<<<<<< HEAD
     private final NpciCallbackHandler npciCallbackHandler;
+=======
+    private final WebhookController webhookController;
+>>>>>>> c24d976 (Initial commit)
 
     /** Thread-safe toggle for demo failure simulation */
     private volatile boolean failureMode = false;
@@ -45,8 +54,13 @@ public class NpciAdapter {
     /** Toggle to suppress webhook entirely (for timeout testing) */
     private volatile boolean suppressWebhook = false;
 
+<<<<<<< HEAD
     public NpciAdapter(@Lazy NpciCallbackHandler npciCallbackHandler) {
         this.npciCallbackHandler = npciCallbackHandler;
+=======
+    public NpciAdapter(@Lazy WebhookController webhookController) {
+        this.webhookController = webhookController;
+>>>>>>> c24d976 (Initial commit)
     }
 
     /**
@@ -92,6 +106,7 @@ public class NpciAdapter {
             return;
         }
 
+<<<<<<< HEAD
         NpciInboundResponseEvent event = new NpciInboundResponseEvent();
         event.setTxnId(tid);
         event.setType("PAY");
@@ -110,6 +125,21 @@ public class NpciAdapter {
 
         // Call our own webhook internally
         npciCallbackHandler.handleNpciResponse(event);
+=======
+        NpciCallbackPayload payload;
+
+        if (failureMode) {
+            // Simulate NPCI rejection (wrong PIN, blocked account, etc.)
+            payload = new NpciCallbackPayload(tid, "ZM", null, "FAILED");
+        } else {
+            // Simulate NPCI success with approval reference number
+            String arn = "ARN-" + String.format("%06d", RANDOM.nextInt(999999));
+            payload = new NpciCallbackPayload(tid, "00", arn, "SUCCESS");
+        }
+
+        // Call our own webhook endpoint (simulates NPCI POST to /api/v1/webhook/npci)
+        webhookController.handleNpciCallback(payload);
+>>>>>>> c24d976 (Initial commit)
     }
 
     /**

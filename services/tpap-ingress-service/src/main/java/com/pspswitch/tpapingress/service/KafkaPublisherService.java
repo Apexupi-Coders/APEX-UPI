@@ -1,9 +1,16 @@
 package com.pspswitch.tpapingress.service;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pspswitch.tpapingress.dto.request.BalanceInquiryRequest;
 import com.pspswitch.tpapingress.dto.request.PaymentInitiateRequest;
 import com.pspswitch.tpapingress.dto.request.VpaLookupRequest;
+=======
+import com.pspswitch.tpapingress.dto.request.BalanceInquiryRequest;
+import com.pspswitch.tpapingress.dto.request.PaymentInitiateRequest;
+import com.pspswitch.tpapingress.dto.request.VpaLookupRequest;
+import com.pspswitch.tpapingress.kafka.KafkaEventEnvelope;
+>>>>>>> c24d976 (Initial commit)
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -21,8 +28,12 @@ import java.util.UUID;
 @Service
 public class KafkaPublisherService {
 
+<<<<<<< HEAD
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+=======
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+>>>>>>> c24d976 (Initial commit)
 
     @Value("${app.kafka.topics.vpa-lookup}")
     private String vpaLookupTopic;
@@ -33,6 +44,7 @@ public class KafkaPublisherService {
     @Value("${app.kafka.topics.payment-initiate}")
     private String paymentInitiateTopic;
 
+<<<<<<< HEAD
     public KafkaPublisherService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
@@ -107,6 +119,38 @@ public class KafkaPublisherService {
             log.error("Failed to publish PAYMENT_INITIATE: {}", e.getMessage());
             return false;
         }
+=======
+    public KafkaPublisherService(KafkaTemplate<String, Object> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+    public boolean publishVpaLookup(VpaLookupRequest request) {
+        return publish(vpaLookupTopic, "VPA_LOOKUP_REQUESTED", request.getTxnId(), request);
+    }
+
+    public boolean publishBalanceInquiry(BalanceInquiryRequest request) {
+        return publish(balanceInquiryTopic, "BALANCE_INQUIRY_REQUESTED", request.getTxnId(), request);
+    }
+
+    public boolean publishPaymentInitiate(PaymentInitiateRequest request) {
+        return publish(paymentInitiateTopic, "PAYMENT_INITIATE_REQUESTED", request.getTxnId(), request);
+    }
+
+    private boolean publish(String topic, String eventType, String txnId, Object data) {
+        KafkaEventEnvelope envelope = KafkaEventEnvelope.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType(eventType)
+                .tpapId(extractTpapId(txnId))
+                .txnId(txnId)
+                .correlationId(UUID.randomUUID().toString())
+                .timestamp(Instant.now().toString())
+                .schemaVersion("1.0")
+                .data(data)
+                .build();
+
+        kafkaTemplate.send(topic, txnId, envelope);
+        log.info("Published {} to topic {} for txnId={}", eventType, topic, txnId);
+>>>>>>> c24d976 (Initial commit)
         return true;
     }
 

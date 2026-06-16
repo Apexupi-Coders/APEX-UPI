@@ -144,6 +144,7 @@ public class TransactionStateService {
         cache.clear();
         repository.deleteAll();
     }
+<<<<<<< HEAD
 
     /**
      * Retrieves all transactions from PostgreSQL (decrypts PII) for the dashboard.
@@ -161,4 +162,6 @@ public class TransactionStateService {
                 })
                 .collect(java.util.stream.Collectors.toList());
     }
+=======
+>>>>>>> c24d976 (Initial commit)
 }

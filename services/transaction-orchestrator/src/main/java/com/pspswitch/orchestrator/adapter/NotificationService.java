@@ -4,6 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+<<<<<<< HEAD
+=======
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+>>>>>>> c24d976 (Initial commit)
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -21,7 +27,11 @@ public class NotificationService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+<<<<<<< HEAD
     @Value("${webhook.tpap.url:http://localhost:8080/api/v1/tpap/callback}")
+=======
+    @Value("${webhook.tpap.url:http://localhost:8080/tpap/api/v1/tpap/callback}")
+>>>>>>> c24d976 (Initial commit)
     private String tpapWebhookUrl;
 
     /**
@@ -51,8 +61,19 @@ public class NotificationService {
     private void sendWebhook(String tid, String pa, String state, BigDecimal am, String reason) {
         try {
             NotificationPayload payload = new NotificationPayload(tid, pa, state, am, reason);
+<<<<<<< HEAD
             restTemplate.postForEntity(tpapWebhookUrl, payload, String.class);
             log.info("[WEBHOOK_OUT] Successfully hit TPAP Webhook: {} for tid={}", tpapWebhookUrl, tid);
+=======
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            // TPAP ingress validates registry key against X-TPAP-ID (see TpapAuthService).
+            headers.add("X-TPAP-ID", "phonepe");
+
+            HttpEntity<NotificationPayload> request = new HttpEntity<>(payload, headers);
+            restTemplate.postForEntity(tpapWebhookUrl, request, String.class);
+            log.info("[WEBHOOK_OUT] Successfully hit TPAP Webhook: {} for tid={} with X-TPAP-ID=phonepe", tpapWebhookUrl, tid);
+>>>>>>> c24d976 (Initial commit)
         } catch (Exception e) {
             log.warn("[WEBHOOK_OUT] Unable to reach TPAP at {}: {}", tpapWebhookUrl, e.getMessage());
         }

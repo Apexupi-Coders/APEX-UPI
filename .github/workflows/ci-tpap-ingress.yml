@@ -46,6 +46,7 @@ jobs:
           cache: 'maven'
 
       - name: Checkstyle
+<<<<<<< HEAD
         run: mvn checkstyle:check -q || true
 
       - name: PMD
@@ -53,6 +54,15 @@ jobs:
 
       - name: SpotBugs
         run: mvn spotbugs:check -q || true
+=======
+        run: mvn checkstyle:check -q
+
+      - name: PMD
+        run: mvn pmd:check -q
+
+      - name: SpotBugs
+        run: mvn spotbugs:check -q
+>>>>>>> c24d976 (Initial commit)
 
       - name: Unit tests
         run: mvn test -Dspring.profiles.active=test

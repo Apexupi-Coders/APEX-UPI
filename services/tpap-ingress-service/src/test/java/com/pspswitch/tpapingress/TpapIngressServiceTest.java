@@ -383,7 +383,10 @@ class PaymentInitiationInputValidationTest {
     @MockBean TpapAuthService authService;
     @MockBean KafkaPublisherService kafkaPublisher;
     @MockBean IdempotencyService idempotencyService;
+<<<<<<< HEAD
     @MockBean org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+=======
+>>>>>>> c24d976 (Initial commit)
 
     private static final String URL = "/tpap/api/v1/payment/initiate";
     private static final String VALID_TXN_ID = "phonepe-" + UUID.randomUUID();

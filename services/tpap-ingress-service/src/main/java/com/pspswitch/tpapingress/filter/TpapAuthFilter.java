@@ -9,7 +9,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
 import org.springframework.core.Ordered;
+=======
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+
+>>>>>>> c24d976 (Initial commit)
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -25,6 +31,10 @@ import java.util.UUID;
  * Skips the /health endpoint.
  * See architecture_spec.md Section 6.
  */
+<<<<<<< HEAD
+=======
+@Slf4j
+>>>>>>> c24d976 (Initial commit)
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 @RequiredArgsConstructor
@@ -36,9 +46,34 @@ public class TpapAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+<<<<<<< HEAD
         return path.endsWith("/health") ||
                path.startsWith("/swagger-ui") ||
                path.startsWith("/v3/api-docs");
+=======
+
+        boolean skip = path.equals("/actuator/health") ||
+
+               path.equals("/actuator/health/") ||
+               path.equals("/actuator/health/readiness") ||
+               path.equals("/actuator/health/readiness/") ||
+               path.equals("/actuator/health/liveness") ||
+               path.equals("/actuator/health/liveness/") ||
+               path.endsWith("/health") ||
+               path.startsWith("/swagger-ui") ||
+               path.startsWith("/v3/api-docs") ||
+               // Callback is invoked by orchestrator/webhook; do not require any TPAP auth headers.
+               path.equals("/api/v1/tpap/callback") ||
+               path.equals("/api/v1/tpap/callback/") ||
+               path.equals("/tpap/api/v1/tpap/callback") ||
+               path.equals("/tpap/api/v1/tpap/callback/");
+
+        if (skip) {
+
+        }
+
+        return skip;
+>>>>>>> c24d976 (Initial commit)
     }
 
     @Override
@@ -48,6 +83,11 @@ public class TpapAuthFilter extends OncePerRequestFilter {
 
         String tpapId = request.getHeader("X-TPAP-ID");
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> c24d976 (Initial commit)
         // Check headers are present and non-blank
         if (isBlank(tpapId)) {
             writeError(response, HttpServletResponse.SC_UNAUTHORIZED,

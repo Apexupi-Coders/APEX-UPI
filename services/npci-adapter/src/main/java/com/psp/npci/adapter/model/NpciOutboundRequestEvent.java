@@ -61,8 +61,19 @@ public class NpciOutboundRequestEvent {
     /** Payee UPI VPA, e.g. {@code merchant@okaxis}. Null for BALANCE requests. */
     private String payeeVpa;
 
+<<<<<<< HEAD
     /** Transaction amount as a decimal string, e.g. {@code "500.00"}. */
     private String amount;
+=======
+    /**
+     * Transaction amount.
+     *
+     * Orchestrator serialises BigDecimal; Jackson will also accept string
+     * payloads for numeric fields.
+     */
+    private java.math.BigDecimal amount;
+
+>>>>>>> c24d976 (Initial commit)
 
     /** ISO-8601 UTC timestamp when the Orchestrator initiated the event. */
     private String timestamp;

@@ -12,7 +12,10 @@ import java.math.BigDecimal;
 public class UpiPaymentRequest {
 
     private String tr; // Transaction reference / order ID
+<<<<<<< HEAD
     private String payerVpa; // Payer UPI ID
+=======
+>>>>>>> c24d976 (Initial commit)
     private String pa; // Payee UPI ID
     private String pn; // Payee name
     private String mc; // Merchant category code (0000=P2P)
@@ -32,6 +35,7 @@ public class UpiPaymentRequest {
 
     // --- Getters and Setters ---
 
+<<<<<<< HEAD
     public String getPayerVpa() {
         return payerVpa;
     }
@@ -40,6 +44,8 @@ public class UpiPaymentRequest {
         this.payerVpa = payerVpa;
     }
 
+=======
+>>>>>>> c24d976 (Initial commit)
     public String getTr() {
         return tr;
     }
