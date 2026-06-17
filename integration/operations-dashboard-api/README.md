@@ -1,6 +1,6 @@
 # operations-dashboard-api
 
-Read-only Spring Boot backend for APEX-UPI operations observability.
+Read-only Spring Boot backend for APEX-UPI operations observability
 
 ## API (read-only)
 - `GET /api/v1/ops/health`
