@@ -1,4 +1,4 @@
-## Branch naming
+## Branch naming.
 - feature/<ticket-id>-short-description
 - fix/<ticket-id>-short-description
 - docs/<ticket-id>-short-description
