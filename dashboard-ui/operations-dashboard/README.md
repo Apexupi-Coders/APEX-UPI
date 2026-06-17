@@ -1,6 +1,6 @@
 # Operations Dashboard UI
 
-Read-only enterprise UPI operations dashboard.
+Read-only enterprise UPI operations dashboard
 
 ## Modules
 - Executive Overview
