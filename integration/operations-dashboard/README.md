@@ -9,5 +9,5 @@ npm run dev
 ```
 
 ## Notes
-- Current files are scaffolded. Next step is implementing modules and wiring to `operations-dashboard-api`.
+- Current files are scaffolded. Next step is implementing modules and wiring to `operations-dashboard-api`
 
