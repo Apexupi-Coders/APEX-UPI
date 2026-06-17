@@ -20,4 +20,3 @@ app:
         npciInboundResponse: npci.inbound.response
       consumer:
         groupId: dashboard-monitor-group
-
