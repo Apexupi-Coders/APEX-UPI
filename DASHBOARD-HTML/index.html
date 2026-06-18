@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="APEX-UPI Operations Dashboard — read-only observability for UPI payment processing">
+  <title>APEX Operations Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell">
+
+    <!-- Sidebar navigation (mounted by sidenav.js) -->
+    <aside id="sidenav"></aside>
+
+    <!-- Mobile sidebar overlay -->
+    <div class="sidenav-overlay" id="sidenav-overlay" aria-hidden="true"></div>
+
+    <!-- Main column: topbar + content -->
+    <div class="app-main-column">
+
+      <!-- Top navbar (mounted by topbar.js) -->
+      <header id="topbar"></header>
+
+      <main class="main-content scrollbar" id="main-content" role="main">
+        <div class="main-content__inner">
+          <div class="main-content__outlet" id="outlet">
+            <div class="main-content__placeholder glass">
+              <h2 class="main-content__placeholder-title">Executive Overview</h2>
+              <p class="main-content__placeholder-text">
+                Dashboard content mounts here via hash routing.
+                Select a module from the sidebar or navigate to <span class="text-accent text-mono">#/executive</span>.
+              </p>
+              <span class="badge badge--info">Read-only</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+/* Active theme — Dark Navy with purple/cyan accents (tokens in variables.css) */
+
+html {
+  color-scheme: dark;
+}
+
+::selection {
+  background: var(--color-accent-muted);
+  color: var(--color-text-primary);
+}

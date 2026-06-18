@@ -1,0 +1,19 @@
+<div class="executive health" data-dashboard="health">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Service Health Center</h2>
+      <p class="executive__subtitle">Aggregated infrastructure and microservice health</p>
+    </div>
+    <div class="executive__header-meta">
+      <span class="badge badge--info" data-health-status>Loading</span>
+      <span data-health-overall></span>
+      <time class="executive__updated text-muted text-sm" data-health-updated datetime="">—</time>
+    </div>
+  </header>
+
+  <section class="health__grid" data-health-grid aria-live="polite"></section>
+  <p class="executive__chart-empty text-muted text-sm" data-health-empty hidden>No health data available</p>
+
+  <p class="executive__error text-sm" data-health-error hidden role="alert"></p>
+</div>

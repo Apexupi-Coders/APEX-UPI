@@ -1,0 +1,281 @@
+<div class="live executive" data-dashboard="live">
+
+
+
+  <header class="executive__header">
+
+    <div class="executive__header-text">
+
+      <h2 class="executive__title">Live Transaction Monitor</h2>
+
+      <p class="executive__subtitle">Real-time UPI transaction feed across the APEX platform</p>
+
+    </div>
+
+    <div class="executive__header-meta">
+
+      <div
+
+        class="topbar__status"
+
+        data-live-refresh
+
+        role="status"
+
+        aria-live="polite"
+
+        title="Auto-refresh enabled"
+
+      >
+
+        <span class="topbar__status-dot" data-live-refresh-dot aria-hidden="true"></span>
+
+        <span data-live-refresh-label>Live · auto-refresh</span>
+
+      </div>
+
+      <time class="executive__updated text-muted text-sm" data-live-updated datetime="">—</time>
+
+    </div>
+
+  </header>
+
+
+
+  <section class="live__toolbar" aria-label="Search and filter transactions">
+
+    <form class="live__toolbar-inner flex flex-wrap items-center gap-4" role="search" data-live-toolbar>
+
+      <label class="topbar__search live__search" for="live-txn-search">
+
+        <span class="sr-only">Search by Transaction ID</span>
+
+        <input
+
+          type="search"
+
+          id="live-txn-search"
+
+          class="topbar__search-input text-mono"
+
+          name="transactionId"
+
+          placeholder="Search by Transaction ID…"
+
+          data-live-search
+
+          autocomplete="off"
+
+          spellcheck="false"
+
+          enterkeyhint="search"
+
+        />
+
+      </label>
+
+
+
+      <fieldset class="live__filters flex items-center gap-2" data-live-filters>
+
+        <legend class="sr-only">Filter by transaction status</legend>
+
+        <button type="button" class="chip chip--active" data-live-filter="all" aria-pressed="true">
+
+          All
+
+        </button>
+
+        <button type="button" class="chip" data-live-filter="success" aria-pressed="false">
+
+          Success
+
+        </button>
+
+        <button type="button" class="chip" data-live-filter="failed" aria-pressed="false">
+
+          Failed
+
+        </button>
+
+        <button type="button" class="chip" data-live-filter="pending" aria-pressed="false">
+
+          Pending
+
+        </button>
+
+      </fieldset>
+
+    </form>
+
+  </section>
+
+
+
+  <section aria-label="Live transaction table">
+
+    <article class="card card--strong card--compact">
+
+      <header class="card__header">
+
+        <div class="card__title-group">
+
+          <h3 class="card__title">Transactions</h3>
+
+          <p class="card__subtitle">Latest activity · updated continuously</p>
+
+        </div>
+
+        <div class="card__actions">
+
+          <span class="badge badge--info" data-live-status>Loading</span>
+
+        </div>
+
+      </header>
+
+
+
+      <div class="card__body live__table-body">
+
+        <div class="data-table-wrap">
+
+          <table
+
+            class="data-table data-table--dense data-table--striped data-table--loading"
+
+            data-live-table
+
+            aria-describedby="live-table-caption"
+
+          >
+
+            <caption id="live-table-caption" class="sr-only">
+
+              Real-time transaction list with status, amount, and timestamps
+
+            </caption>
+
+            <thead>
+
+              <tr>
+
+                <th scope="col">Transaction ID</th>
+
+                <th scope="col">Reference</th>
+
+                <th scope="col">Payer</th>
+
+                <th scope="col">Payee</th>
+
+                <th scope="col" class="data-table__cell--numeric">Amount</th>
+
+                <th scope="col">Status</th>
+
+                <th scope="col">Time</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody data-live-tbody aria-live="polite" aria-relevant="additions removals"></tbody>
+
+          </table>
+
+
+
+          <div class="data-table__empty" data-live-empty hidden>
+
+            <p class="data-table__empty-title">No transactions found</p>
+
+            <p class="data-table__empty-text">
+
+              Adjust your Transaction ID search or status filters to see results.
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+
+        <nav class="data-table-footer" aria-label="Transaction table pagination" data-live-pagination>
+
+          <p class="data-table-footer__meta" data-live-page-meta>Showing 0–0 of 0</p>
+
+          <div class="data-table-footer__actions">
+
+            <button
+
+              type="button"
+
+              class="data-table-footer__btn"
+
+              data-live-prev
+
+              aria-label="Previous page"
+
+              disabled
+
+            >
+
+              ‹
+
+            </button>
+
+            <button
+
+              type="button"
+
+              class="data-table-footer__btn"
+
+              data-live-page="1"
+
+              aria-label="Page 1"
+
+              aria-current="page"
+
+            >
+
+              1
+
+            </button>
+
+            <button
+
+              type="button"
+
+              class="data-table-footer__btn"
+
+              data-live-next
+
+              aria-label="Next page"
+
+              disabled
+
+            >
+
+              ›
+
+            </button>
+
+          </div>
+
+        </nav>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+
+  <p class="executive__error text-sm" data-live-error hidden role="alert"></p>
+
+
+
+</div>
+
+

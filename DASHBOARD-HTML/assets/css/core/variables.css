@@ -1,0 +1,126 @@
+/* Theme tokens — Dark Navy / Purple / Cyan */
+
+:root {
+  /* ── Navy backgrounds ── */
+  --color-bg-deep: #060b14;
+  --color-bg-base: #0a1020;
+  --color-bg-raised: #0f1729;
+  --color-bg-surface: #141e33;
+  --color-bg-elevated: #1a2740;
+  --color-bg-hover: #1f3050;
+  --color-bg-active: #243758;
+
+  /* ── Purple accent ── */
+  --color-purple-400: #a78bfa;
+  --color-purple-500: #8b5cf6;
+  --color-purple-600: #7c3aed;
+  --color-purple-700: #6d28d9;
+  --color-accent: var(--color-purple-500);
+  --color-accent-strong: var(--color-purple-600);
+  --color-accent-muted: rgba(139, 92, 246, 0.18);
+  --color-accent-glow: rgba(139, 92, 246, 0.35);
+
+  /* ── Cyan highlights ── */
+  --color-cyan-300: #67e8f9;
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06b6d4;
+  --color-cyan-600: #0891b2;
+  --color-highlight: var(--color-cyan-400);
+  --color-highlight-strong: var(--color-cyan-500);
+  --color-highlight-muted: rgba(34, 211, 238, 0.14);
+  --color-highlight-glow: rgba(34, 211, 238, 0.3);
+
+  /* ── Text ── */
+  --color-text-primary: #eef2ff;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-text-inverse: #060b14;
+  --color-text-accent: var(--color-cyan-300);
+
+  /* ── Borders & dividers ── */
+  --color-border-subtle: rgba(148, 163, 184, 0.08);
+  --color-border-default: rgba(148, 163, 184, 0.14);
+  --color-border-strong: rgba(148, 163, 184, 0.24);
+  --color-border-accent: rgba(139, 92, 246, 0.45);
+  --color-border-highlight: rgba(34, 211, 238, 0.4);
+
+  /* ── Status ── */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-pending: #fb923c;
+  --color-info: var(--color-cyan-400);
+
+  /* ── Glassmorphism ── */
+  --glass-bg: rgba(15, 23, 41, 0.72);
+  --glass-bg-strong: rgba(20, 30, 51, 0.88);
+  --glass-border: rgba(148, 163, 184, 0.12);
+  --glass-blur: 16px;
+  --glass-blur-strong: 24px;
+
+  /* ── Typography ── */
+  --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "Cascadia Code", "Consolas", "Courier New", monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 0.9375rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.65;
+
+  /* ── Spacing scale ── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* ── Layout ── */
+  --topbar-height: 3.5rem;
+  --sidenav-width: 15.5rem;
+  --sidenav-width-collapsed: 4.25rem;
+  --content-max-width: 1440px;
+  --content-padding: var(--space-6);
+  --content-padding-mobile: var(--space-4);
+
+  /* ── Radius ── */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-glow-purple: 0 0 20px var(--color-accent-glow);
+  --shadow-glow-cyan: 0 0 20px var(--color-highlight-glow);
+
+  /* ── Motion ── */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 320ms ease;
+
+  /* ── Z-index ── */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-topbar: 300;
+  --z-sidenav: 350;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+}

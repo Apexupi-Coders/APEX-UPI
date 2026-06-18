@@ -1,0 +1,42 @@
+<div class="executive ledger" data-dashboard="ledger">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Ledger Dashboard</h2>
+      <p class="executive__subtitle">Read-only ledger entries from PostgreSQL</p>
+    </div>
+    <time class="executive__updated text-muted text-sm" data-ledger-updated datetime="">—</time>
+  </header>
+
+  <article class="card card--strong">
+    <div class="card__header">
+      <div class="card__title-group">
+        <h3 class="card__title">Recent Entries</h3>
+        <p class="card__subtitle">Debit, credit, and running balance</p>
+      </div>
+    </div>
+    <div class="card__body">
+      <div class="data-table-wrap">
+        <table class="data-table data-table--dense data-table--striped">
+          <thead>
+            <tr>
+              <th scope="col">Entry ID</th>
+              <th scope="col">Transaction</th>
+              <th scope="col" class="data-table__cell--numeric">Debit</th>
+              <th scope="col" class="data-table__cell--numeric">Credit</th>
+              <th scope="col" class="data-table__cell--numeric">Balance</th>
+              <th scope="col">Description</th>
+              <th scope="col">Time</th>
+            </tr>
+          </thead>
+          <tbody data-ledger-tbody></tbody>
+        </table>
+        <div class="data-table__empty" data-ledger-empty hidden>
+          <p class="data-table__empty-title">No ledger entries</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <p class="executive__error text-sm" data-ledger-error hidden role="alert"></p>
+</div>

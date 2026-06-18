@@ -1,0 +1,58 @@
+<div class="executive journey" data-dashboard="journey">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Transaction Journey</h2>
+      <p class="executive__subtitle">Full state-change timeline for a transaction ID</p>
+    </div>
+    <div class="executive__header-meta" data-journey-status-badge>
+      <span class="status-badge status-badge--neutral"><span class="status-badge__dot"></span><span class="status-badge__label">—</span></span>
+    </div>
+  </header>
+
+  <section class="journey__search">
+    <form class="live__toolbar-inner flex flex-wrap items-center gap-4" data-journey-form role="search">
+      <label class="topbar__search live__search" for="journey-txn-input">
+        <span class="sr-only">Transaction ID</span>
+        <input type="search" id="journey-txn-input" class="topbar__search-input text-mono" placeholder="Enter Transaction ID…" data-journey-input autocomplete="off" spellcheck="false" />
+      </label>
+      <button type="submit" class="pill">Lookup Journey</button>
+    </form>
+  </section>
+
+  <section class="journey__meta-grid">
+    <article class="card card--compact">
+      <div class="card__body">
+        <span class="card__metric-label">Transaction ID</span>
+        <span class="card__metric text-mono text-sm" data-journey-tid>—</span>
+      </div>
+    </article>
+    <article class="card card--compact">
+      <div class="card__body">
+        <span class="card__metric-label">Started</span>
+        <span class="card__metric text-sm" data-journey-started>—</span>
+      </div>
+    </article>
+    <article class="card card--compact">
+      <div class="card__body">
+        <span class="card__metric-label">Completed</span>
+        <span class="card__metric text-sm" data-journey-completed>—</span>
+      </div>
+    </article>
+  </section>
+
+  <article class="card card--strong">
+    <div class="card__header">
+      <div class="card__title-group">
+        <h3 class="card__title">State Timeline</h3>
+        <p class="card__subtitle">Chronological journey through microservices</p>
+      </div>
+    </div>
+    <div class="card__body">
+      <ul class="timeline" data-journey-timeline></ul>
+      <p class="executive__chart-empty text-muted text-sm" data-journey-empty hidden>No journey data</p>
+    </div>
+  </article>
+
+  <p class="executive__error text-sm" data-journey-error hidden role="alert"></p>
+</div>

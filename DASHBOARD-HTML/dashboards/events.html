@@ -1,0 +1,28 @@
+<div class="executive" data-dashboard="events">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Real-Time Event Stream</h2>
+      <p class="executive__subtitle">Business events from Kafka monitoring consumer groups</p>
+    </div>
+    <div class="executive__header-meta">
+      <span class="badge badge--info" data-events-status>Loading</span>
+      <time class="executive__updated text-muted text-sm" data-events-updated datetime="">—</time>
+    </div>
+  </header>
+
+  <article class="card card--strong">
+    <div class="card__header">
+      <div class="card__title-group">
+        <h3 class="card__title">Event Timeline</h3>
+        <p class="card__subtitle">Latest platform events · auto-refreshing</p>
+      </div>
+    </div>
+    <div class="card__body">
+      <ul class="timeline" data-events-list aria-live="polite"></ul>
+      <p class="executive__chart-empty text-muted text-sm" data-events-empty hidden>No events received</p>
+    </div>
+  </article>
+
+  <p class="executive__error text-sm" data-events-error hidden role="alert"></p>
+</div>

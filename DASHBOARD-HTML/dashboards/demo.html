@@ -1,0 +1,39 @@
+<div class="executive demo" data-dashboard="demo">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Demo Mode</h2>
+      <p class="executive__subtitle">Realistic mock playback — no backend required</p>
+    </div>
+    <time class="executive__updated text-muted text-sm" data-demo-updated datetime="">—</time>
+  </header>
+
+  <section class="demo__controls flex flex-wrap items-center gap-4">
+    <label class="demo__speed-label">
+      <span class="text-sm text-muted">Playback speed</span>
+      <select class="demo__speed-select" data-demo-speed>
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+        <option value="4">4×</option>
+      </select>
+    </label>
+    <button type="button" class="pill pill--outline" data-demo-refresh>Refresh now</button>
+    <div class="demo__kpis flex flex-wrap gap-2" data-demo-kpis></div>
+  </section>
+
+  <article class="card card--strong">
+    <div class="card__header">
+      <div class="card__title-group">
+        <h3 class="card__title">Live Mock Feed</h3>
+        <p class="card__subtitle">Simulated transaction stream</p>
+      </div>
+      <span class="badge badge--purple">Mock API</span>
+    </div>
+    <div class="card__body">
+      <ul class="demo__feed" data-demo-feed aria-live="polite"></ul>
+    </div>
+  </article>
+
+  <p class="executive__error text-sm" data-demo-error hidden role="alert"></p>
+</div>

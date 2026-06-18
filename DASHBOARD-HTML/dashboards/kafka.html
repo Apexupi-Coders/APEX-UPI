@@ -1,0 +1,66 @@
+<div class="executive kafka" data-dashboard="kafka">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Kafka Monitoring Center</h2>
+      <p class="executive__subtitle">Topic throughput and consumer group lag</p>
+    </div>
+    <div class="executive__header-meta">
+      <span class="badge badge--info" data-kafka-status>Loading</span>
+      <span data-kafka-broker></span>
+      <time class="executive__updated text-muted text-sm" data-kafka-updated datetime="">—</time>
+    </div>
+  </header>
+
+  <section class="kafka__grid">
+    <article class="card card--strong">
+      <div class="card__header">
+        <div class="card__title-group">
+          <h3 class="card__title">Topics</h3>
+          <p class="card__subtitle">Partition count, throughput, and lag</p>
+        </div>
+      </div>
+      <div class="card__body">
+        <div class="data-table-wrap">
+          <table class="data-table data-table--dense data-table--striped">
+            <thead>
+              <tr>
+                <th scope="col">Topic</th>
+                <th scope="col" class="data-table__cell--numeric">Partitions</th>
+                <th scope="col" class="data-table__cell--numeric">Msg/s</th>
+                <th scope="col" class="data-table__cell--numeric">Lag</th>
+              </tr>
+            </thead>
+            <tbody data-kafka-topics></tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="card card--strong">
+      <div class="card__header">
+        <div class="card__title-group">
+          <h3 class="card__title">Consumer Groups</h3>
+          <p class="card__subtitle">Active members and lag per group</p>
+        </div>
+      </div>
+      <div class="card__body">
+        <div class="data-table-wrap">
+          <table class="data-table data-table--dense data-table--striped">
+            <thead>
+              <tr>
+                <th scope="col">Group</th>
+                <th scope="col">Topic</th>
+                <th scope="col" class="data-table__cell--numeric">Lag</th>
+                <th scope="col" class="data-table__cell--numeric">Members</th>
+              </tr>
+            </thead>
+            <tbody data-kafka-groups></tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <p class="executive__error text-sm" data-kafka-error hidden role="alert"></p>
+</div>

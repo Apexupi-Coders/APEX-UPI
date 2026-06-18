@@ -1,0 +1,41 @@
+<div class="executive audit" data-dashboard="audit">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Audit Dashboard</h2>
+      <p class="executive__subtitle">Read-only access audit trail</p>
+    </div>
+    <time class="executive__updated text-muted text-sm" data-audit-updated datetime="">—</time>
+  </header>
+
+  <article class="card card--strong">
+    <div class="card__header">
+      <div class="card__title-group">
+        <h3 class="card__title">Audit Log</h3>
+        <p class="card__subtitle">Dashboard API access events</p>
+      </div>
+    </div>
+    <div class="card__body">
+      <div class="data-table-wrap">
+        <table class="data-table data-table--dense data-table--striped">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Actor</th>
+              <th scope="col">Action</th>
+              <th scope="col">Resource</th>
+              <th scope="col">IP</th>
+              <th scope="col">Time</th>
+            </tr>
+          </thead>
+          <tbody data-audit-tbody></tbody>
+        </table>
+        <div class="data-table__empty" data-audit-empty hidden>
+          <p class="data-table__empty-title">No audit entries</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <p class="executive__error text-sm" data-audit-error hidden role="alert"></p>
+</div>

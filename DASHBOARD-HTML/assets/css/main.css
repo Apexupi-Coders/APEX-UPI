@@ -1,0 +1,19 @@
+/* APEX Operations Dashboard — single CSS entry */
+
+@import url("core/reset.css");
+@import url("core/variables.css");
+@import url("core/typography.css");
+@import url("core/layout.css");
+@import url("core/utilities.css");
+@import url("themes/dark-navy.css");
+@import url("components/card.css");
+@import url("components/data-table.css");
+@import url("components/status-badge.css");
+@import url("components/timeline.css");
+@import url("dashboards/executive.css");
+@import url("dashboards/live.css");
+@import url("dashboards/journey.css");
+@import url("dashboards/kafka.css");
+@import url("dashboards/health.css");
+@import url("dashboards/architecture.css");
+@import url("dashboards/demo.css");

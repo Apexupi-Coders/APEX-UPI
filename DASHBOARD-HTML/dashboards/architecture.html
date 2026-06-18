@@ -1,0 +1,56 @@
+<div class="executive architecture" data-dashboard="architecture">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Architecture Flow</h2>
+      <p class="executive__subtitle">UPI payment processing pipeline — read-only observability layer</p>
+    </div>
+    <span class="badge badge--purple">Static</span>
+  </header>
+
+  <article class="card card--strong architecture__flow-card">
+    <div class="card__body architecture__flow">
+      <div class="architecture__node" data-flow-node>
+        <span class="architecture__node-icon">TP</span>
+        <span class="architecture__node-label">TPAP</span>
+        <span class="architecture__node-desc">Entry callbacks</span>
+      </div>
+      <div class="architecture__arrow" aria-hidden="true">→</div>
+      <div class="architecture__node" data-flow-node>
+        <span class="architecture__node-icon">KF</span>
+        <span class="architecture__node-label">Kafka</span>
+        <span class="architecture__node-desc">Message broker</span>
+      </div>
+      <div class="architecture__arrow" aria-hidden="true">→</div>
+      <div class="architecture__node" data-flow-node>
+        <span class="architecture__node-icon">OR</span>
+        <span class="architecture__node-label">Orchestrator</span>
+        <span class="architecture__node-desc">State machine</span>
+      </div>
+      <div class="architecture__arrow" aria-hidden="true">→</div>
+      <div class="architecture__node" data-flow-node>
+        <span class="architecture__node-icon">NA</span>
+        <span class="architecture__node-label">NPCI Adapter</span>
+        <span class="architecture__node-desc">Protocol bridge</span>
+      </div>
+      <div class="architecture__arrow" aria-hidden="true">→</div>
+      <div class="architecture__node" data-flow-node>
+        <span class="architecture__node-icon">NP</span>
+        <span class="architecture__node-label">NPCI</span>
+        <span class="architecture__node-desc">Payment network</span>
+      </div>
+    </div>
+    <div class="architecture__branch">
+      <div class="architecture__arrow architecture__arrow--down" aria-hidden="true">↓</div>
+      <div class="architecture__node architecture__node--secondary" data-flow-node>
+        <span class="architecture__node-icon">LG</span>
+        <span class="architecture__node-label">Ledger</span>
+        <span class="architecture__node-desc">Webhook settlement</span>
+      </div>
+    </div>
+    <p class="architecture__note text-muted text-sm">
+      Observability dashboard connects read-only to PostgreSQL and Kafka via monitoring consumer groups.
+      No mutations to production topics or transaction state.
+    </p>
+  </article>
+</div>

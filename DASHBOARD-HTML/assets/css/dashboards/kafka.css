@@ -1,0 +1,13 @@
+/* Kafka dashboard */
+
+.kafka__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+@media (max-width: 1024px) {
+  .kafka__grid {
+    grid-template-columns: 1fr;
+  }
+}

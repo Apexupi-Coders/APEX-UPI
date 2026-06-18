@@ -1,0 +1,45 @@
+<div class="executive errors" data-dashboard="errors">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Error Intelligence Center</h2>
+      <p class="executive__subtitle">Classified errors across the APEX platform</p>
+    </div>
+    <div class="executive__header-meta">
+      <span class="badge badge--failed">Total <span data-errors-total>—</span></span>
+      <time class="executive__updated text-muted text-sm" data-errors-updated datetime="">—</time>
+    </div>
+  </header>
+
+  <section class="errors__category-grid" data-errors-categories aria-label="Errors by category"></section>
+
+  <article class="card card--strong">
+    <div class="card__header">
+      <div class="card__title-group">
+        <h3 class="card__title">Recent Errors</h3>
+        <p class="card__subtitle">Grouped by category and occurrence count</p>
+      </div>
+    </div>
+    <div class="card__body">
+      <div class="data-table-wrap">
+        <table class="data-table data-table--dense data-table--striped">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Category</th>
+              <th scope="col">Message</th>
+              <th scope="col" class="data-table__cell--numeric">Count</th>
+              <th scope="col">Last Seen</th>
+            </tr>
+          </thead>
+          <tbody data-errors-tbody></tbody>
+        </table>
+        <div class="data-table__empty" data-errors-empty hidden>
+          <p class="data-table__empty-title">No errors recorded</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <p class="executive__error text-sm" data-errors-error hidden role="alert"></p>
+</div>

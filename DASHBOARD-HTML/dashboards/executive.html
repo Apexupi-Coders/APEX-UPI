@@ -1,0 +1,98 @@
+<div class="executive" data-dashboard="executive">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Executive Overview</h2>
+      <p class="executive__subtitle">Real-time UPI payment observability across the APEX platform</p>
+    </div>
+    <div class="executive__header-meta">
+      <span class="badge badge--info" data-executive-status>Loading</span>
+      <time class="executive__updated text-muted text-sm" data-executive-updated datetime="">—</time>
+    </div>
+  </header>
+
+  <!-- KPI row -->
+  <section class="executive__kpi-grid" aria-label="Key performance indicators">
+
+    <article class="card card--kpi card--accent executive__kpi" data-kpi="tps">
+      <div class="card__body">
+        <span class="card__metric-label">Transactions / Sec</span>
+        <span class="card__metric" data-kpi-value>—</span>
+        <span class="card__metric-delta" data-kpi-delta hidden></span>
+      </div>
+    </article>
+
+    <article class="card card--kpi executive__kpi" data-kpi="successRate">
+      <div class="card__body">
+        <span class="card__metric-label">Success Rate</span>
+        <span class="card__metric executive__metric--success" data-kpi-value>—</span>
+        <span class="card__metric-delta" data-kpi-delta hidden></span>
+      </div>
+    </article>
+
+    <article class="card card--kpi executive__kpi" data-kpi="failureRate">
+      <div class="card__body">
+        <span class="card__metric-label">Failure Rate</span>
+        <span class="card__metric executive__metric--failure" data-kpi-value>—</span>
+        <span class="card__metric-delta" data-kpi-delta hidden></span>
+      </div>
+    </article>
+
+    <article class="card card--kpi executive__kpi" data-kpi="pendingCount">
+      <div class="card__body">
+        <span class="card__metric-label">Pending Transactions</span>
+        <span class="card__metric executive__metric--pending" data-kpi-value>—</span>
+        <span class="card__metric-delta" data-kpi-delta hidden></span>
+      </div>
+    </article>
+
+    <article class="card card--kpi card--highlight executive__kpi executive__kpi--wide" data-kpi="revenue">
+      <div class="card__body">
+        <span class="card__metric-label">Revenue Summary</span>
+        <span class="card__metric" data-kpi-value>—</span>
+        <span class="card__metric-delta" data-kpi-delta hidden></span>
+        <span class="executive__revenue-period text-muted text-xs" data-kpi-sub>Today · INR</span>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- Charts + health -->
+  <section class="executive__main-grid">
+
+    <article class="card card--strong executive__chart-card">
+      <div class="card__header">
+        <div class="card__title-group">
+          <h3 class="card__title">Transaction Volume</h3>
+          <p class="card__subtitle">Throughput over the last 24 hours</p>
+        </div>
+        <span class="chip chip--active" data-chart-peak>Peak —</span>
+      </div>
+      <div class="card__body executive__chart-body">
+        <canvas class="executive__chart" data-volume-chart width="800" height="280" role="img" aria-label="Transaction volume chart"></canvas>
+        <p class="executive__chart-empty text-muted text-sm" data-chart-empty hidden>No volume data available</p>
+      </div>
+    </article>
+
+    <article class="card card--strong executive__health-card">
+      <div class="card__header">
+        <div class="card__title-group">
+          <h3 class="card__title">System Health Summary</h3>
+          <p class="card__subtitle">Infrastructure and microservice status</p>
+        </div>
+        <span class="status-badge status-badge--neutral" data-health-overall>
+          <span class="status-badge__dot"></span>
+          <span class="status-badge__label">—</span>
+        </span>
+      </div>
+      <div class="card__body executive__health-body">
+        <ul class="executive__health-list" data-health-list aria-live="polite"></ul>
+        <p class="executive__health-empty text-muted text-sm" data-health-empty hidden>No health data available</p>
+      </div>
+    </article>
+
+  </section>
+
+  <p class="executive__error text-sm" data-executive-error hidden role="alert"></p>
+
+</div>

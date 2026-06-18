@@ -1,0 +1,185 @@
+/* Executive Overview dashboard */
+
+.executive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.executive__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.executive__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.executive__subtitle {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.executive__header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.executive__updated {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── KPI grid ── */
+
+.executive__kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-4);
+}
+
+.executive__kpi {
+  grid-column: span 3;
+}
+
+.executive__kpi--wide {
+  grid-column: span 12;
+}
+
+.executive__kpi .card__body {
+  gap: var(--space-1);
+}
+
+.executive__metric--success {
+  color: var(--color-success);
+}
+
+.executive__metric--failure {
+  color: var(--color-error);
+}
+
+.executive__metric--pending {
+  color: var(--color-pending);
+}
+
+.executive__revenue-period {
+  margin-top: var(--space-1);
+}
+
+.executive__kpi[data-loading="true"] .card__metric {
+  opacity: 0.35;
+}
+
+/* ── Main grid ── */
+
+.executive__main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.executive__chart-body {
+  position: relative;
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+.executive__chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+}
+
+.executive__chart-empty,
+.executive__health-empty {
+  padding: var(--space-8) 0;
+  text-align: center;
+}
+
+/* ── Health list ── */
+
+.executive__health-body {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+
+.executive__health-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.executive__health-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  transition: border-color var(--transition-fast);
+}
+
+.executive__health-item:hover {
+  border-color: var(--color-border-default);
+}
+
+.executive__health-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.executive__health-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.executive__health-latency {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.executive__error {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 1200px) {
+  .executive__kpi {
+    grid-column: span 6;
+  }
+
+  .executive__main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .executive__kpi {
+    grid-column: span 12;
+  }
+
+  .executive__header-meta {
+    align-items: flex-start;
+  }
+}

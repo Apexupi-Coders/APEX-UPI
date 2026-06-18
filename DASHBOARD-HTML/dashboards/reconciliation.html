@@ -1,0 +1,62 @@
+<div class="executive reconciliation" data-dashboard="reconciliation">
+
+  <header class="executive__header">
+    <div class="executive__header-text">
+      <h2 class="executive__title">Reconciliation Dashboard</h2>
+      <p class="executive__subtitle">Ledger vs transaction matching status</p>
+    </div>
+    <time class="executive__updated text-muted text-sm" data-rec-updated datetime="">—</time>
+  </header>
+
+  <section class="executive__kpi-grid">
+    <article class="card card--kpi executive__kpi">
+      <div class="card__body">
+        <span class="card__metric-label">Matched</span>
+        <span class="card__metric executive__metric--success" data-rec-matched>—</span>
+      </div>
+    </article>
+    <article class="card card--kpi executive__kpi">
+      <div class="card__body">
+        <span class="card__metric-label">Mismatched</span>
+        <span class="card__metric executive__metric--failure" data-rec-mismatched>—</span>
+      </div>
+    </article>
+    <article class="card card--kpi executive__kpi">
+      <div class="card__body">
+        <span class="card__metric-label">Pending Review</span>
+        <span class="card__metric executive__metric--pending" data-rec-pending>—</span>
+      </div>
+    </article>
+  </section>
+
+  <article class="card card--strong">
+    <div class="card__header">
+      <div class="card__title-group">
+        <h3 class="card__title">Open Mismatches</h3>
+        <p class="card__subtitle">Items requiring operator attention</p>
+      </div>
+    </div>
+    <div class="card__body">
+      <div class="data-table-wrap">
+        <table class="data-table data-table--dense data-table--striped">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Transaction</th>
+              <th scope="col" class="data-table__cell--numeric">Expected</th>
+              <th scope="col" class="data-table__cell--numeric">Actual</th>
+              <th scope="col">Issue</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody data-rec-tbody></tbody>
+        </table>
+        <div class="data-table__empty" data-rec-empty hidden>
+          <p class="data-table__empty-title">No mismatches</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <p class="executive__error text-sm" data-rec-error hidden role="alert"></p>
+</div>
