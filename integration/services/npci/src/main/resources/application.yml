@@ -1,0 +1,23 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: npci-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/npci_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+app:
+  bankswitch-host: ${BANKSWITCH_HOST:http://192.168.29.6:8080}
+  psp-callback-url: ${PSP_CALLBACK_URL:http://192.168.29.145:8084}
