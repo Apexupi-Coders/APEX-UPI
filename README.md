@@ -65,18 +65,18 @@ The platform supports two deployment environments. In both cases all services ru
 
 | VM | Subsystem | Key Services |
 | --- | --- | --- |
-| VM 1 | PSP Switch | 9 microservices, Kafka, Redis, PostgreSQL (`apexupi`) |
-| VM 2 | Banking Switch | 5 microservices, PostgreSQL (`bankswitch_db`) |
-| VM 3 | Core Banking System | CBS service, PostgreSQL (`cbs_db`) |
-| VM 4 | NPCI Network | NPCI service, PostgreSQL (`npci_db`) |
+| VM&nbsp;1 | PSP Switch | 9 microservices, Kafka, Redis, PostgreSQL (`apexupi`) |
+| VM&nbsp;2 | Banking Switch | 5 microservices, PostgreSQL (`bankswitch_db`) |
+| VM&nbsp;3 | Core Banking System | CBS service, PostgreSQL (`cbs_db`) |
+| VM&nbsp;4 | NPCI Network | NPCI service, PostgreSQL (`npci_db`) |
 
 ### Cloud -- Azure (3 VMs)
 
 | VM | Subsystem | Key Services |
 | --- | --- | --- |
-| VM 1 | PSP Switch | 9 microservices, Kafka, Redis, PostgreSQL (`apexupi`) |
-| VM 2 | NPCI Network | NPCI service, PostgreSQL (`npci_db`) |
-| VM 3 | Banking Services | Banking Switch + CBS, PostgreSQL (`bankswitch_db`, `cbs_db`) |
+| VM&nbsp;1 | PSP Switch | 9 microservices, Kafka, Redis, PostgreSQL (`apexupi`) |
+| VM&nbsp;2 | NPC Network | NPCI service, PostgreSQL (`npci_db`) |
+| VM&nbsp;3 | Banking Services | Banking Switch + CBS, PostgreSQL (`bankswitch_db`, `cbs_db`) |
 
 For full setup instructions, database scripts, and port reference, see [Deployment Docs](Documentation/Deployment%20Docs/README.md).
 
