@@ -65,29 +65,29 @@ All services run as standalone Java processes on virtual machines. Two deploymen
 <table>
   <thead>
     <tr>
-      <th>VM</th>
-      <th>Subsystem</th>
+      <th width="60">VM</th>
+      <th width="200">Subsystem</th>
       <th>Key Services</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>VM 1</td>
+      <td nowrap>VM 1</td>
       <td>PSP Switch</td>
       <td>9 microservices, Kafka, Redis, PostgreSQL (<code>apexupi</code>)</td>
     </tr>
     <tr>
-      <td>VM 2</td>
+      <td nowrap>VM 2</td>
       <td>Banking Switch</td>
       <td>5 microservices, PostgreSQL (<code>bankswitch_db</code>)</td>
     </tr>
     <tr>
-      <td>VM 3</td>
+      <td nowrap>VM 3</td>
       <td>Core Banking System</td>
       <td>CBS service, PostgreSQL (<code>cbs_db</code>)</td>
     </tr>
     <tr>
-      <td>VM 4</td>
+      <td nowrap>VM 4</td>
       <td>NPCI Network</td>
       <td>NPCI service, PostgreSQL (<code>npci_db</code>)</td>
     </tr>
@@ -99,24 +99,24 @@ All services run as standalone Java processes on virtual machines. Two deploymen
 <table>
   <thead>
     <tr>
-      <th>VM</th>
-      <th>Subsystem</th>
+      <th width="60">VM</th>
+      <th width="200">Subsystem</th>
       <th>Key Services</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>VM 1</td>
+      <td nowrap>VM 1</td>
       <td>PSP Switch</td>
       <td>9 microservices, Kafka, Redis, PostgreSQL (<code>apexupi</code>)</td>
     </tr>
     <tr>
-      <td>VM 2</td>
+      <td nowrap>VM 2</td>
       <td>NPCI Network</td>
       <td>NPCI service, PostgreSQL (<code>npci_db</code>)</td>
     </tr>
     <tr>
-      <td>VM 3</td>
+      <td nowrap>VM 3</td>
       <td>Banking Services</td>
       <td>Banking Switch + CBS, PostgreSQL (<code>bankswitch_db</code>, <code>cbs_db</code>)</td>
     </tr>
