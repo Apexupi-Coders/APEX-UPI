@@ -116,6 +116,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming conventions, commit mes
 
 ## Project Documents
 
-- [Business Requirement Document](Business%20Requirement%20Document.pdf)
-- [Software Requirement Specification](Software%20Requirement%20Specification.pdf)
-- [High Level Design](High%20Level%20Design.pdf)
+- [Business Requirement Document](Documentation/Business%20Requirement%20Document.pdf)
+- [Software Requirement Specification](Documentation/Software%20Requirement%20Specification.pdf)
+- [High Level Design](Documentation/High%20Level%20Design.pdf)
