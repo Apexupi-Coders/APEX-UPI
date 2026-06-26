@@ -1,4 +1,4 @@
-# Apex UPI: A High-Concurrency PSP Switch &amp; Ledger Engine for HPE Nonstop Platform
+# Apex UPI: A High-Concurrency PSP Switch & Ledger Engine for HPE Nonstop Platform
 
 Apex UPI is a full-stack, microservices-based UPI (Unified Payments Interface) platform built to simulate and demonstrate the complete payment lifecycle across four core subsystems: PSP Switch, NPCI Network, Banking Switch, and Core Banking System (CBS).
 
@@ -62,66 +62,20 @@ All services run as standalone Java processes on virtual machines. Two deploymen
 
 ### Local &mdash; VirtualBox (4 VMs)
 
-<table>
-  <thead>
-    <tr>
-      <th width="60">VM</th>
-      <th width="200">Subsystem</th>
-      <th>Key Services</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td nowrap>VM 1</td>
-      <td>PSP Switch</td>
-      <td>9 microservices, Kafka, Redis, PostgreSQL (<code>apexupi</code>)</td>
-    </tr>
-    <tr>
-      <td nowrap>VM 2</td>
-      <td>Banking Switch</td>
-      <td>5 microservices, PostgreSQL (<code>bankswitch_db</code>)</td>
-    </tr>
-    <tr>
-      <td nowrap>VM 3</td>
-      <td>Core Banking System</td>
-      <td>CBS service, PostgreSQL (<code>cbs_db</code>)</td>
-    </tr>
-    <tr>
-      <td nowrap>VM 4</td>
-      <td>NPCI Network</td>
-      <td>NPCI service, PostgreSQL (<code>npci_db</code>)</td>
-    </tr>
-  </tbody>
-</table>
+| Subsystem | Key Services |
+|:---|:---|
+| **VM 1** &mdash; PSP Switch | 9 microservices, Kafka, Redis, PostgreSQL (`apexupi`) |
+| **VM 2** &mdash; Banking Switch | 5 microservices, PostgreSQL (`bankswitch_db`) |
+| **VM 3** &mdash; Core Banking System | CBS service, PostgreSQL (`cbs_db`) |
+| **VM 4** &mdash; NPCI Network | NPCI service, PostgreSQL (`npci_db`) |
 
 ### Cloud &mdash; Azure (3 VMs)
 
-<table>
-  <thead>
-    <tr>
-      <th width="60">VM</th>
-      <th width="200">Subsystem</th>
-      <th>Key Services</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td nowrap>VM 1</td>
-      <td>PSP Switch</td>
-      <td>9 microservices, Kafka, Redis, PostgreSQL (<code>apexupi</code>)</td>
-    </tr>
-    <tr>
-      <td nowrap>VM 2</td>
-      <td>NPCI Network</td>
-      <td>NPCI service, PostgreSQL (<code>npci_db</code>)</td>
-    </tr>
-    <tr>
-      <td nowrap>VM 3</td>
-      <td>Banking Services</td>
-      <td>Banking Switch + CBS, PostgreSQL (<code>bankswitch_db</code>, <code>cbs_db</code>)</td>
-    </tr>
-  </tbody>
-</table>
+| Subsystem | Key Services |
+|:---|:---|
+| **VM 1** &mdash; PSP Switch | 9 microservices, Kafka, Redis, PostgreSQL (`apexupi`) |
+| **VM 2** &mdash; NPCI Network | NPCI service, PostgreSQL (`npci_db`) |
+| **VM 3** &mdash; Banking Services | Banking Switch + CBS, PostgreSQL (`bankswitch_db`, `cbs_db`) |
 
 For full setup instructions, database scripts, and port reference, see [Deployment Docs](Documentation/Deployment%20Docs/README.md).
 
