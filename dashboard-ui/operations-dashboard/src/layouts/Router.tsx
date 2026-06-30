@@ -9,6 +9,7 @@ export type RouteId =
   | 'kafka'
   | 'reconciliation'
   | 'ledger'
+  | 'root-cause'
   | 'audit'
   | 'errors'
   | 'health'
@@ -23,6 +24,7 @@ const routeOrder: RouteId[] = [
   'kafka',
   'reconciliation',
   'ledger',
+  'root-cause',
   'audit',
   'errors',
   'health',
@@ -38,6 +40,7 @@ const routeToHash: Record<RouteId, string> = {
   kafka: '#/kafka',
   reconciliation: '#/reconciliation',
   ledger: '#/ledger',
+  'root-cause': '#/root-cause',
   audit: '#/audit',
   errors: '#/errors',
   health: '#/health',
@@ -75,6 +78,8 @@ export function Outlet() {
 }
 
 export { routeOrder };
+
+
 
 
 

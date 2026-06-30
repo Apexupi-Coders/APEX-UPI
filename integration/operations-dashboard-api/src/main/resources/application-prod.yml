@@ -1,0 +1,39 @@
+app:
+  monitoring:
+    services:
+      - name: PSP VM
+        url: http://prod-psp-vm:8080/actuator/health
+        expectedStatus: 200
+        timeoutMs: 5000
+      - name: NPCI VM
+        url: http://prod-npci-vm:8082/actuator/health
+        expectedStatus: 200
+        timeoutMs: 5000
+      - name: CBS VM
+        url: http://prod-cbs-vm:8083/actuator/health
+        expectedStatus: 200
+        timeoutMs: 5000
+      - name: Banking Switch VM
+        url: http://prod-banking-switch:8084/actuator/health
+        expectedStatus: 200
+        timeoutMs: 5000
+      - name: Kafka
+        url: http://prod-kafka:9092
+        expectedStatus: 200
+        timeoutMs: 5000
+      - name: Redis
+        url: http://prod-redis:6379
+        expectedStatus: 200
+        timeoutMs: 5000
+      - name: PostgreSQL
+        url: http://prod-postgres:5432
+        expectedStatus: 200
+        timeoutMs: 5000
+      - name: Transaction Orchestrator
+        url: http://prod-orchestrator:8085/actuator/health
+        expectedStatus: 200
+        timeoutMs: 5000
+      - name: Audit Service
+        url: http://prod-audit:8086/actuator/health
+        expectedStatus: 200
+        timeoutMs: 5000

@@ -1,21 +1,4 @@
-server:
-  port: 8081
-
-spring:
-  application:
-    name: operations-dashboard-api
-  profiles:
-    active: ${APP_PROFILE:local}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-
 app:
-  live:
-    control-status-url: https://frayed-hurler-retiree.ngrok-free.dev/api/v1/control/status
   monitoring:
     services:
       - name: PSP VM
@@ -47,17 +30,10 @@ app:
         expectedStatus: 200
         timeoutMs: 3000
       - name: Transaction Orchestrator
-        url: http://localhost:8085/actuator/health
+        url: http://localhost:8082/actuator/health
         expectedStatus: 200
         timeoutMs: 3000
       - name: Audit Service
-        url: http://localhost:8086/actuator/health
+        url: http://localhost:8083/actuator/health
         expectedStatus: 200
         timeoutMs: 3000
-    kafka:
-      bootstrapServers: localhost:9092
-      topics:
-        npciOutboundRequest: npci.outbound.request
-        npciInboundResponse: npci.inbound.response
-      consumer:
-        groupId: dashboard-monitor-group

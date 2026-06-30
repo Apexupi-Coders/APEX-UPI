@@ -9,6 +9,7 @@ const label: Record<RouteId, string> = {
   kafka: 'Kafka Center',
   reconciliation: 'Reconciliation',
   ledger: 'Ledger',
+  'root-cause': 'Root Cause Analysis',
   audit: 'Audit',
   errors: 'Errors',
   health: 'Health',
