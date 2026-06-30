@@ -56,6 +56,7 @@ public class PaymentRequestConsumer {
                 request = new UpiPaymentRequest();
                 request.setTr(data.path("txnId").asText(null));
                 request.setPa(data.path("payeeVpa").asText(null));
+                request.setPayerVpa(data.path("payerVpa").asText(null));
                 
                 String pn = data.path("payeeName").asText("");
                 request.setPn(pn.isEmpty() ? "Mock Payee Name" : pn);

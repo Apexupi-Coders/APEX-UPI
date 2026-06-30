@@ -17,6 +17,7 @@ public class TransactionContext {
     private String tid; // PSP-generated transaction ID (correlation ID)
     private String tr; // Transaction reference from request
     private String pa; // Payee UPI ID
+    private String payerVpa; // Payer UPI VPA
     private String pn; // Payee name
     private String mc; // Merchant category code
     private BigDecimal am; // Amount
@@ -71,6 +72,14 @@ public class TransactionContext {
 
     public void setPa(String pa) {
         this.pa = pa;
+    }
+
+    public String getPayerVpa() {
+        return payerVpa;
+    }
+
+    public void setPayerVpa(String payerVpa) {
+        this.payerVpa = payerVpa;
     }
 
     public String getPn() {

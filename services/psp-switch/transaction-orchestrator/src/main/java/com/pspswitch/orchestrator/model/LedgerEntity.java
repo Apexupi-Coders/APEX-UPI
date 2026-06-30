@@ -33,7 +33,7 @@ public class LedgerEntity {
     @Column(name = "cu", length = 5)
     private String cu;
 
-    @Column(name = "approval_ref_no", length = 20)
+    @Column(name = "approval_ref_no", length = 100)
     private String approvalRefNo;
 
     @Column(name = "response_code", length = 10)
