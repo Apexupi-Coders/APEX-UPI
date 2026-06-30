@@ -13,6 +13,7 @@ public class UpiPaymentRequest {
 
     private String tr; // Transaction reference / order ID
     private String pa; // Payee UPI ID
+    private String payerVpa; // Payer UPI VPA
     private String pn; // Payee name
     private String mc; // Merchant category code (0000=P2P)
     private BigDecimal am; // Amount (2 decimal places)
@@ -45,6 +46,14 @@ public class UpiPaymentRequest {
 
     public void setPa(String pa) {
         this.pa = pa;
+    }
+
+    public String getPayerVpa() {
+        return payerVpa;
+    }
+
+    public void setPayerVpa(String payerVpa) {
+        this.payerVpa = payerVpa;
     }
 
     public String getPn() {

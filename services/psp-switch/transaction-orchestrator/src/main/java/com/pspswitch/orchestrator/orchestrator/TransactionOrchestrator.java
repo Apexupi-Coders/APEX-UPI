@@ -149,7 +149,8 @@ public class TransactionOrchestrator {
 
             NpciOutboundRequestEvent npciEvent = new NpciOutboundRequestEvent(
                     tid, msgId, eventType,
-                    pspId + "@psp",       // payer VPA derived from PSP — real systems supply authenticated VPA
+                    (context.getPayerVpa() != null && !context.getPayerVpa().isBlank())
+                            ? context.getPayerVpa() : pspId + "@psp",   // real payer VPA from JMeter
                     context.getPa(),      // payee VPA
                     context.getAm() != null ? context.getAm().toPlainString() : "0.00",
                     context.getCu() != null ? context.getCu() : "INR",
@@ -266,17 +267,9 @@ public class TransactionOrchestrator {
         String tid = context.getTid();
         try {
             String msgId = UUID.randomUUID().toString();
-            String payerVpa = pspId + "@psp";
-            String payeeVpa = context.getPa();
-            
-            if ("BALANCE".equals(eventType)) {
-                payerVpa = context.getPa();
-                payeeVpa = ""; // Payee not needed for balance enquiry
-            }
-
             NpciOutboundRequestEvent npciEvent = new NpciOutboundRequestEvent(
                     tid, msgId, eventType,
-                    payerVpa, payeeVpa, "0.00", "INR", pspId
+                    pspId + "@psp", context.getPa(), "0.00", "INR", pspId
             );
             npciKafkaPublisher.publish(npciEvent);
             context.setState(TransactionState.SUBMITTED);
@@ -311,6 +304,7 @@ public class TransactionOrchestrator {
         ctx.setTid(tid);
         ctx.setTr(request.getTr());
         ctx.setPa(request.getPa());
+        ctx.setPayerVpa(request.getPayerVpa());
         ctx.setPn(request.getPn());
         ctx.setMc(request.getMc());
         ctx.setAm(request.getAm());
