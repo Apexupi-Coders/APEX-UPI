@@ -240,3 +240,16 @@ mvn clean package -DskipTests
 The service JAR is output to `target/tpap-ingress-service-1.0.0-SNAPSHOT.jar`. Deployment instructions for VirtualBox and Azure are covered in [14_Configuration_and_Deployment.md](./14_Configuration_and_Deployment.md).
 
 OpenAPI documentation is available at the `/swagger-ui.html` path once the service is running.
+
+Idempotency Check
+
+curl -s -X POST http://localhost:8080/tpap/api/v1/payment/initiate \
+  -H "Content-Type: application/json" -H "X-TPAP-ID: phonepe" \
+  -d '{"txnId":"phonepe-89999999-8888-7777-6666-555555555555","payerMobile":"9111111001","payeeMobile":"9123456789","amount":"50.00","currency":"INR","encryptedPin":"securepin123","deviceFingerprint":"demo-device","txnType":"PEER_TO_PEER","remarks":"Idempotent"}' | python3 -m json.tool
+
+-----------
+
+curl -s -X POST http://localhost:8080/tpap/api/v1/payment/initiate \
+  -H "Content-Type: application/json" -H "X-TPAP-ID: phonepe" \
+  -d '{"txnId":"phonepe-89999999-8888-7777-6666-555555555555","payerMobile":"9111111001","payeeMobile":"9123456789","amount":"50.00","currency":"INR","encryptedPin":"securepin123","deviceFingerprint":"demo-device","txnType":"PEER_TO_PEER","remarks":"Idempotent"}' | python3 -m json.tool
+
