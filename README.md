@@ -113,9 +113,3 @@ Refer to the [Deployment Docs](Documentation/Deployment%20Docs/README.md) for th
 See [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming conventions, commit message format, and pull request checklist.
 
 ---
-
-## Project Documents
-
-- [Business Requirement Document](Documentation/Business%20Requirement%20Document.pdf)
-- [Software Requirement Specification](Documentation/Software%20Requirement%20Specification.pdf)
-- [High Level Design](Documentation/High%20Level%20Design.pdf)
