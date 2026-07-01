@@ -191,3 +191,13 @@ The following convenience scripts are provided for automated setup:
 | `create-db.sql` | `services/cbs/setup/` | Creates `cbs_db` database |
 | `install.sh` | `services/cbs/setup/` | Full install script (Linux/macOS) |
 | `install.ps1` | `services/cbs/setup/` | Full install script (Windows/PowerShell) |
+
+sudo -u postgres psql -d cbs_debit -c "SELECT vpa, name, to_char(balance, 'FM99,99,999.00') AS balance FROM accounts ORDER BY name;"
+
+sudo -u postgres psql -d cbs_credit -c "SELECT vpa, name, to_char(balance, 'FM99,99,999.00') AS balance FROM accounts ORDER BY name;"
+
+sudo -u postgres psql -d cbs_debit -c "SELECT txn_id, payer_vpa, amount, status, created_at FROM debit_ledger ORDER BY created_at DESC LIMIT 15;"
+
+sudo -u postgres psql -d cbs_credit -c "SELECT txn_id, payee_vpa, amount, status, created_at FROM credit_ledger ORDER BY created_at DESC LIMIT 15;"
+
+sudo -u postgres psql -d cbs_debit -c "SELECT txn_id, payer_vpa, amount, reason, reversed_at FROM reversal_ledger ORDER BY reversed_at DESC LIMIT 5;"
