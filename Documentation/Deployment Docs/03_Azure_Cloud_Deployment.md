@@ -143,7 +143,7 @@ CREATE TABLE bank_ledger (
     id          SERIAL PRIMARY KEY,
     txn_id      VARCHAR(255),
     account     VARCHAR(255),
-    entry_type  VARCHAR(50),
+    entry_type  VARCHAR(100),
     amount      DOUBLE PRECISION,
     status      VARCHAR(50)
 );
@@ -307,4 +307,6 @@ curl -X POST http://<VM3_PRIVATE_IP>:8080/bank/upi/ReqBalEnq \
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" http://<VM2_PRIVATE_IP>:9090
+curl -s http://localhost:8082/api/npci/inflight | python3 -m json.tool
+
 ```
