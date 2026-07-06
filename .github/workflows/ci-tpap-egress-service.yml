@@ -1,17 +1,17 @@
-name: CI — tpap-ingress-service
+name: CI — tpap-egress-service
 
 on:
   push:
-    paths: ['services/psp-switch/tpap-ingress-service/**', 'tooling/**', 'parent-pom/**']
+    paths: ['services/psp-switch/tpap-egress-service/**']
   pull_request:
-    paths: ['services/psp-switch/tpap-ingress-service/**', 'tooling/**', 'parent-pom/**']
+    paths: ['services/psp-switch/tpap-egress-service/**']
 
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/psp-switch/tpap-ingress-service
+        working-directory: services/psp-switch/tpap-egress-service
 
     services:
       kafka:
@@ -21,21 +21,6 @@ jobs:
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
           KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      redis:
-        image: redis:7-alpine
-        ports: ['6379:6379']
-      postgres:
-        image: postgres:16-alpine
-        ports: ['5432:5432']
-        env:
-          POSTGRES_DB: tpap_ingress_test
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -56,17 +41,12 @@ jobs:
 
       - name: Unit tests
         run: mvn test -Dspring.profiles.active=test
-
-      - name: Integration tests
-        run: mvn verify -P integration-test
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/tpap_ingress_test
-          SPRING_REDIS_HOST: localhost
           KAFKA_BOOTSTRAP_SERVERS: localhost:9092
 
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: surefire-reports
-          path: services/psp-switch/tpap-ingress-service/target/surefire-reports/
+          name: surefire-reports-tpap-egress
+          path: services/psp-switch/tpap-egress-service/target/surefire-reports/
