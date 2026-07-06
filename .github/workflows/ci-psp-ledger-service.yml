@@ -1,0 +1,57 @@
+name: CI — psp-ledger-service
+
+on:
+  push:
+    paths: ['services/psp-switch/psp-ledger-service/**']
+  pull_request:
+    paths: ['services/psp-switch/psp-ledger-service/**']
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/psp-switch/psp-ledger-service
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        ports: ['5432:5432']
+        env:
+          POSTGRES_DB: psp_ledger_test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Checkstyle
+        run: mvn checkstyle:check -q || true
+
+      - name: PMD
+        run: mvn pmd:check -q || true
+
+      - name: SpotBugs
+        run: mvn spotbugs:check -q || true
+
+      - name: Unit tests
+        run: mvn test -Dspring.profiles.active=test
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/psp_ledger_test
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-psp-ledger
+          path: services/psp-switch/psp-ledger-service/target/surefire-reports/
