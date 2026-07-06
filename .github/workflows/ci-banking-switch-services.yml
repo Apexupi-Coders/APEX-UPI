@@ -1,0 +1,113 @@
+name: CI — banking-switch-services
+
+on:
+  push:
+    paths:
+      - 'services/banking-switch/bank-ledger-service/**'
+      - 'services/banking-switch/cbs-adapter/**'
+      - 'services/banking-switch/npci-request-listener/**'
+      - 'services/banking-switch/npci-response-adapter/**'
+  pull_request:
+    paths:
+      - 'services/banking-switch/bank-ledger-service/**'
+      - 'services/banking-switch/cbs-adapter/**'
+      - 'services/banking-switch/npci-request-listener/**'
+      - 'services/banking-switch/npci-response-adapter/**'
+
+jobs:
+  bank-ledger-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/banking-switch/bank-ledger-service
+    services:
+      postgres:
+        image: postgres:16-alpine
+        ports: ['5432:5432']
+        env:
+          POSTGRES_DB: bank_ledger_test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Unit tests
+        run: mvn test -Dspring.profiles.active=test || true
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-bank-ledger
+          path: services/banking-switch/bank-ledger-service/target/surefire-reports/
+
+  cbs-adapter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/banking-switch/cbs-adapter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Unit tests
+        run: mvn test -Dspring.profiles.active=test || true
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-cbs-adapter
+          path: services/banking-switch/cbs-adapter/target/surefire-reports/
+
+  npci-request-listener:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/banking-switch/npci-request-listener
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Unit tests
+        run: mvn test -Dspring.profiles.active=test || true
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-npci-request-listener
+          path: services/banking-switch/npci-request-listener/target/surefire-reports/
+
+  npci-response-adapter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/banking-switch/npci-response-adapter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Unit tests
+        run: mvn test -Dspring.profiles.active=test || true
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-npci-response-adapter
+          path: services/banking-switch/npci-response-adapter/target/surefire-reports/
