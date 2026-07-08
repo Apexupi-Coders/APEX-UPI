@@ -18,8 +18,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.pspswitch.tpapingress.controller.VpaLookupController.*;
-
 @RestController
 @RequestMapping("/tpap/api/v1")
 @RequiredArgsConstructor

@@ -47,20 +47,27 @@ public class TpapAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String tpapId = request.getHeader("X-TPAP-ID");
+        String apiKey = request.getHeader("X-TPAP-API-Key");
 
-        // Check headers are present and non-blank
+        // Check required headers are present and non-blank
         if (isBlank(tpapId)) {
             writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
                     "MISSING_TPAP_ID", "X-TPAP-ID header is required");
             return;
         }
 
+        if (isBlank(apiKey)) {
+            writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "MISSING_API_KEY", "X-TPAP-API-Key header is required");
+            return;
+        }
+
         // Authenticate against registry
         try {
-            boolean authenticated = authService.authenticate(tpapId);
+            boolean authenticated = authService.authenticate(tpapId, apiKey);
             if (!authenticated) {
                 writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                        "INVALID_TPAP_ID", "Provided TPAP ID is not registered");
+                        "INVALID_CREDENTIALS", "Provided TPAP ID or API key is invalid");
                 return;
             }
         } catch (RateLimitExceededException e) {

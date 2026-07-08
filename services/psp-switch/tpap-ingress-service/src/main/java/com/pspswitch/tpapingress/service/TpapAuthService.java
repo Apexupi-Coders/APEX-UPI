@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -21,14 +22,24 @@ public class TpapAuthService {
     }
 
     /**
-     * Validates that the tpapId is registered.
+     * Validates that the tpapId is registered AND the apiKey matches.
+     * Uses MessageDigest.isEqual() for constant-time comparison to prevent timing attacks.
      *
+     * @param tpapId the TPAP identifier from X-TPAP-ID header
+     * @param apiKey the API key from X-TPAP-API-Key header
      * @return true if authentication succeeds
      */
-    public boolean authenticate(String tpapId) {
-        if (tpapId == null) {
+    public boolean authenticate(String tpapId, String apiKey) {
+        if (tpapId == null || apiKey == null) {
             return false;
         }
-        return registry.containsKey(tpapId.toLowerCase());
+        String expectedKey = registry.get(tpapId.toLowerCase());
+        if (expectedKey == null) {
+            return false;
+        }
+        // Constant-time comparison to prevent timing attacks
+        return MessageDigest.isEqual(
+                expectedKey.getBytes(StandardCharsets.UTF_8),
+                apiKey.getBytes(StandardCharsets.UTF_8));
     }
 }
