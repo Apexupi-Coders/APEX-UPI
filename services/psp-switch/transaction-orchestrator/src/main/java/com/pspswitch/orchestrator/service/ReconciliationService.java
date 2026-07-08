@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -62,6 +63,7 @@ public class ReconciliationService {
      * (prevents overlapping sweeps if one takes longer than 60s)
      */
     @Scheduled(fixedDelay = 60000)
+    @Transactional
     public void reconcileUnknownTransactions() {
         // Step A: Query all UNKNOWN transactions from PostgreSQL
         List<TransactionEntity> unknowns = transactionRepository.findByState(TransactionState.UNKNOWN);

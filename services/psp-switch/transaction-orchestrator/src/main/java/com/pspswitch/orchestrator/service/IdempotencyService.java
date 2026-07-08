@@ -5,10 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pspswitch.orchestrator.model.TransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Idempotency Service — Step 1 of the orchestration saga.
@@ -115,20 +119,34 @@ public class IdempotencyService {
 
     /**
      * Returns approximate count of idempotency keys (for status endpoint).
+     * Uses SCAN instead of KEYS to avoid blocking the Redis event loop.
      */
     public int size() {
-        // Note: KEYS is expensive in production — use SCAN or separate counter
-        var keys = redisTemplate.keys(KEY_PREFIX + "*");
-        return keys != null ? keys.size() : 0;
+        int count = 0;
+        ScanOptions options = ScanOptions.scanOptions().match(KEY_PREFIX + "*").count(100).build();
+        try (Cursor<String> cursor = redisTemplate.scan(options)) {
+            while (cursor.hasNext()) {
+                cursor.next();
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
      * Clears all idempotency keys — used for testing.
+     * Uses SCAN instead of KEYS to avoid blocking the Redis event loop.
      */
     public void clear() {
-        var keys = redisTemplate.keys(KEY_PREFIX + "*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
+        List<String> keysToDelete = new ArrayList<>();
+        ScanOptions options = ScanOptions.scanOptions().match(KEY_PREFIX + "*").count(100).build();
+        try (Cursor<String> cursor = redisTemplate.scan(options)) {
+            while (cursor.hasNext()) {
+                keysToDelete.add(cursor.next());
+            }
+        }
+        if (!keysToDelete.isEmpty()) {
+            redisTemplate.delete(keysToDelete);
         }
     }
 }
