@@ -11,7 +11,7 @@ The platform reflects the real-world architecture of a UPI-compliant payment sys
 | Layer | Technology |
 |:---|:---|
 | Language | Java 17 |
-| Framework | Spring Boot 3.2.5 |
+| Framework | Spring Boot 3.3.0 |
 | Messaging | Apache Kafka |
 | Database | PostgreSQL 14+ |
 | Cache | Redis 7 |

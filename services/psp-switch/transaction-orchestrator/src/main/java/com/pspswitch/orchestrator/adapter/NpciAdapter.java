@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Random;
+import java.security.SecureRandom;
 
 /**
  * NPCI Adapter — simulates REST communication with the NPCI switch.
@@ -34,7 +34,7 @@ import java.util.Random;
 public class NpciAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(NpciAdapter.class);
-    private static final Random RANDOM = new Random();
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final WebhookController webhookController;
 
@@ -67,10 +67,9 @@ public class NpciAdapter {
 
         log.info("[NPCI_ADAPTER] tid={} | REST_CALL_SENT | state=SUBMITTED | awaiting webhook", tid);
 
-        // Fire webhook callback asynchronously (simulates NPCI calling back after PIN
-        // auth)
+        // Fire webhook callback asynchronously via @Async("orchestratorExecutor")
         if (!suppressWebhook) {
-            java.util.concurrent.CompletableFuture.runAsync(() -> fireWebhookAsync(tid));
+            fireWebhookAsync(tid);
         } else {
             log.info("[NPCI_ADAPTER] tid={} | WEBHOOK_SUPPRESSED | Simulating timeout scenario", tid);
         }
