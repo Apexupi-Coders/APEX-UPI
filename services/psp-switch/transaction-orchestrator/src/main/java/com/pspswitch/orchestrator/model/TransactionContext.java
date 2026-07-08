@@ -176,7 +176,6 @@ public class TransactionContext {
 
     public void setState(TransactionState state) {
         this.state = state;
-        this.updatedAt = Instant.now();
     }
 
     public String getApprovalRefNo() {

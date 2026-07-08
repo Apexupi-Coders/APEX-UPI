@@ -75,10 +75,15 @@ public class WebhookController {
     /**
      * POST /api/v1/webhook/npci
      *
-     * Receives the final transaction result from NPCI (simulated by NpciAdapter).
-     * On SUCCESS (responseCode="00"): branches on flowDirection (SEND vs COLLECT).
-     * On FAILURE (responseCode!="00"): marks transaction FAILED and ends flow.
+     * <p><b>DEMO/MOCK ONLY:</b> This endpoint is called internally by {@link
+     * com.pspswitch.orchestrator.adapter.NpciAdapter} to simulate NPCI webhook callbacks
+     * in local/integration test mode. In production, NPCI responses arrive via Kafka topic
+     * {@code npci.inbound.response} and are handled by
+     * {@link com.pspswitch.orchestrator.kafka.NpciResponseKafkaConsumer}.
+     *
+     * @deprecated Use NpciResponseKafkaConsumer for production NPCI callback handling.
      */
+    @Deprecated
     @PostMapping("/npci")
     public ResponseEntity<Map<String, String>> handleNpciCallback(@RequestBody NpciCallbackPayload payload) {
         String tid = payload.getTid();

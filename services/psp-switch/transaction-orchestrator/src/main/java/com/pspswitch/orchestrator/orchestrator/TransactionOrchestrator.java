@@ -5,6 +5,7 @@ import com.pspswitch.orchestrator.kafka.NpciResponseKafkaConsumer;
 import com.pspswitch.orchestrator.kafka.SwitchCompletedEventProducer;
 import com.pspswitch.orchestrator.model.*;
 import com.pspswitch.orchestrator.service.*;
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -115,8 +116,8 @@ public class TransactionOrchestrator {
         log.info("[MODE] tid={} | mode={} | requiresPasscode={} | flowType={}",
                 tid, request.getMode(), ppCtx.isRequiresPasscode(), ppCtx.getFlowType());
 
-        // ── STEP 4: VALIDATION ─────────────────────────────────────────────────
-        // validationService.validate(request, tid); // Validation bypassed - handled by tpap-ingress
+        // ── STEP 4: VALIDATION ─────────────────────────────────────────────
+        validationService.validate(request, tid);
 
         // ── STEP 5: WRITE PENDING STATE ────────────────────────────────────────
         TransactionContext context = buildContext(request, tid, ppCtx);
@@ -171,7 +172,7 @@ public class TransactionOrchestrator {
                 if (ctx != null && ctx.getState() == TransactionState.SUBMITTED) {
                     log.warn("[ORCHESTRATOR] tid={} | TIMEOUT | No NPCI response within {}s",
                             tid, npciTimeoutSeconds);
-                    ctx.setState(TransactionState.FAILED);
+                    ctx.setState(TransactionState.UNKNOWN);
                     ctx.setFailureReason("NPCI response timeout after " + npciTimeoutSeconds + "s");
                     stateService.update(ctx);
 
@@ -335,5 +336,15 @@ public class TransactionOrchestrator {
 
         public TransactionResponse getResponse() { return response; }
         public boolean isDuplicate() { return duplicate; }
+    }
+
+    /**
+     * Shuts down the timeout scheduler on application context close.
+     * Prevents thread leaks during application shutdown.
+     */
+    @PreDestroy
+    public void shutdown() {
+        log.info("[ORCHESTRATOR] Shutting down timeout scheduler");
+        timeoutScheduler.shutdownNow();
     }
 }
