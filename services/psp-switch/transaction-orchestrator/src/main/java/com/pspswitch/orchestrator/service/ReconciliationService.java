@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -63,7 +64,6 @@ public class ReconciliationService {
      * (prevents overlapping sweeps if one takes longer than 60s)
      */
     @Scheduled(fixedDelay = 60000)
-    @Transactional
     public void reconcileUnknownTransactions() {
         // Step A: Query all UNKNOWN transactions from PostgreSQL
         List<TransactionEntity> unknowns = transactionRepository.findByState(TransactionState.UNKNOWN);
@@ -79,9 +79,29 @@ public class ReconciliationService {
 
         int resolved = 0;
 
-        // Step C: For each UNKNOWN transaction, re-query NPCI
+        // Step C: For each UNKNOWN transaction, re-query NPCI in its own transaction.
+        // Using REQUIRES_NEW ensures a failure on one transaction does NOT roll back
+        // the successfully resolved ones in the same sweep.
         for (TransactionEntity txnEntity : unknowns) {
             try {
+                reconcileSingle(txnEntity);
+                resolved++;
+            } catch (Exception e) {
+                log.error("[RECONCILIATION] tid={} | ERROR during reconciliation | {}",
+                        txnEntity.getTid(), e.getMessage(), e);
+            }
+        }
+
+        log.info("[RECONCILIATION] Sweep complete | resolved={} transactions", resolved);
+    }
+
+    /**
+     * Resolves a single UNKNOWN transaction in its own isolated transaction.
+     * REQUIRES_NEW propagation ensures this commit is independent of the sweep loop.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void reconcileSingle(TransactionEntity txnEntity) {
+        try {
                 String tid = txnEntity.getTid();
                 TransactionContext context = txnEntity.toContext();
 
@@ -125,14 +145,10 @@ public class ReconciliationService {
                     resolved++;
                 }
 
-            } catch (Exception e) {
-                // Log error but continue to next transaction — don't abort sweep
-                log.error("[RECONCILIATION] tid={} | ERROR during reconciliation | {}",
-                        txnEntity.getTid(), e.getMessage(), e);
-            }
+        } catch (Exception e) {
+            log.error("[RECONCILIATION] tid={} | reconcileSingle failed | {}",
+                    txnEntity.getTid(), e.getMessage(), e);
+            throw e; // rethrow so the sweep loop can catch and continue
         }
-
-        // Step D: Summary log
-        log.info("[RECONCILIATION] Sweep complete | resolved={} transactions", resolved);
     }
 }
