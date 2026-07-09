@@ -60,8 +60,18 @@ public class KafkaPublisherService {
                 .data(data)
                 .build();
 
-        kafkaTemplate.send(topic, txnId, envelope);
-        log.info("Published {} to topic {} for txnId={}", eventType, topic, txnId);
+        kafkaTemplate.send(topic, txnId, envelope)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("[KAFKA-PUBLISHER] Publish FAILED | topic={} | txnId={} | error={}",
+                                topic, txnId, ex.getMessage(), ex);
+                    } else {
+                        log.info("[KAFKA-PUBLISHER] Published {} to topic={} | txnId={} | partition={} | offset={}",
+                                eventType, topic, txnId,
+                                result.getRecordMetadata().partition(),
+                                result.getRecordMetadata().offset());
+                    }
+                });
         return true;
     }
 
