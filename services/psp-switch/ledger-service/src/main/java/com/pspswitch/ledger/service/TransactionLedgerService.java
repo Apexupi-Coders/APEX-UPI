@@ -74,11 +74,13 @@ public class TransactionLedgerService {
                     .build();
             eventRepository.save(statusEvent);
 
-            // 3. Update status
+            // 3. Update status and persist — txnRepository.save() is required here
+            // to write the updated status and completedAt back to PostgreSQL.
             txn.setStatus(status);
             if ("SUCCESS".equalsIgnoreCase(status) || "FAILED".equalsIgnoreCase(status)) {
                 txn.setCompletedAt(Instant.now());
             }
+            txnRepository.save(txn); // fix: persist status transition to DB
 
             // 4. Double-Entry Bookkeeping (if SUCCESS)
             if ("SUCCESS".equalsIgnoreCase(status)) {
