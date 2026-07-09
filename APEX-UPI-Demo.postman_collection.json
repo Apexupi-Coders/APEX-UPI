@@ -1,0 +1,256 @@
+{
+  "info": {
+    "name": "APEX-UPI Executive Demo",
+    "description": "Professional Postman collection for APEX-UPI demo scenarios and operations toggles.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Dashboard & Status",
+      "item": [
+        {
+          "name": "Get Live System Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/control/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "control",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Transactions",
+      "item": [
+        {
+          "name": "Initiate P2P (SEND)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tid\": \"TID-{{$randomUUID}}\",\n  \"tr\": \"ORD-P2P-{{$timestamp}}\",\n  \"pa\": \"merchant@yesbank\",\n  \"pn\": \"Fresh Mart\",\n  \"mc\": \"0000\",\n  \"am\": 50.00,\n  \"mam\": 50.00,\n  \"cu\": \"INR\",\n  \"mode\": \"04\",\n  \"mid\": \"MID-001\",\n  \"msid\": \"STORE-01\",\n  \"mtid\": \"POS-01\",\n  \"isSignatureVerified\": true,\n  \"flowDirection\": \"SEND\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/txn",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "txn"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Initiate COLLECT (Merchant)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tid\": \"TID-{{$randomUUID}}\",\n  \"tr\": \"ORD-COLLECT-{{$timestamp}}\",\n  \"pa\": \"merchant@yesbank\",\n  \"pn\": \"Fresh Mart\",\n  \"mc\": \"5411\",\n  \"am\": 150.00,\n  \"mam\": 150.00,\n  \"cu\": \"INR\",\n  \"mode\": \"16\",\n  \"mid\": \"MID-001\",\n  \"msid\": \"STORE-01\",\n  \"mtid\": \"POS-01\",\n  \"isSignatureVerified\": true,\n  \"flowDirection\": \"COLLECT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/txn",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "txn"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Failure Simulation Toggles",
+      "item": [
+        {
+          "name": "Toggle CBS Failure (ON)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/control/cbs-failure?enabled=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "control",
+                "cbs-failure"
+              ],
+              "query": [
+                {
+                  "key": "enabled",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle CBS Failure (OFF)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/control/cbs-failure?enabled=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "control",
+                "cbs-failure"
+              ],
+              "query": [
+                {
+                  "key": "enabled",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle NPCI Failure (ON)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/control/npci-failure?enabled=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "control",
+                "npci-failure"
+              ],
+              "query": [
+                {
+                  "key": "enabled",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle NPCI Failure (OFF)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/control/npci-failure?enabled=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "control",
+                "npci-failure"
+              ],
+              "query": [
+                {
+                  "key": "enabled",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Advanced / Recovery",
+      "item": [
+        {
+          "name": "Simulate NPCI Webhook Success (For COLLECT bugs)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tid\": \"TID-REPLACE_ME\",\n  \"responseCode\": \"00\",\n  \"approvalRefNo\": \"ARN-999888\",\n  \"status\": \"SUCCESS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhook/npci",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhook",
+                "npci"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Trigger Manual Reconciliation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/control/reconcile-now",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "control",
+                "reconcile-now"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://frayed-hurler-retiree.ngrok-free.dev",
+      "type": "string"
+    }
+  ]
+}
