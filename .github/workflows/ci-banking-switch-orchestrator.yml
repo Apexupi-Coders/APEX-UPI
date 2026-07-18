@@ -2,9 +2,13 @@ name: CI — banking-switch-orchestrator
 
 on:
   push:
-    paths: ['services/banking-switch/orchestrator/**']
+    paths:
+      - 'services/banking-switch/orchestrator/**'
+      - '.github/workflows/ci-banking-switch-orchestrator.yml'
   pull_request:
-    paths: ['services/banking-switch/orchestrator/**']
+    paths:
+      - 'services/banking-switch/orchestrator/**'
+      - '.github/workflows/ci-banking-switch-orchestrator.yml'
 
 jobs:
   lint-and-test:

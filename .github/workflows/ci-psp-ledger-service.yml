@@ -2,9 +2,13 @@ name: CI — psp-ledger-service
 
 on:
   push:
-    paths: ['services/psp-switch/psp-ledger-service/**']
+    paths:
+      - 'services/psp-switch/psp-ledger-service/**'
+      - '.github/workflows/ci-psp-ledger-service.yml'
   pull_request:
-    paths: ['services/psp-switch/psp-ledger-service/**']
+    paths:
+      - 'services/psp-switch/psp-ledger-service/**'
+      - '.github/workflows/ci-psp-ledger-service.yml'
 
 jobs:
   lint-and-test:
