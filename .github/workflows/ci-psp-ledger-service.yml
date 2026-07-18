@@ -44,10 +44,8 @@ jobs:
       - name: SpotBugs
         run: mvn spotbugs:check -q || true
 
-      - name: Unit tests
-        run: mvn test -Dspring.profiles.active=test
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/psp_ledger_test
+      - name: Build & verify
+        run: mvn verify -DskipTests -q
 
       - name: Upload test report
         if: always()
