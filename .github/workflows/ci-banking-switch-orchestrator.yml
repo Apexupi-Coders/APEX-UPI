@@ -56,27 +56,8 @@ jobs:
         run: mvn spotbugs:check -q || true
 
       - name: Install parent POM
-        working-directory: .
-        run: |
-          cat > /tmp/parent-pom.xml << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <project xmlns="http://maven.apache.org/POM/4.0.0"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-            <modelVersion>4.0.0</modelVersion>
-            <groupId>com.bankingswitch</groupId>
-            <artifactId>payment-switch</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <packaging>pom</packaging>
-          </project>
-          EOF
-          mvn install:install-file \
-            -Dfile=/tmp/parent-pom.xml \
-            -DgroupId=com.bankingswitch \
-            -DartifactId=payment-switch \
-            -Dversion=1.0.0-SNAPSHOT \
-            -Dpackaging=pom \
-            -DgeneratePom=false
+        working-directory: services/banking-switch
+        run: mvn -N install -q
 
       - name: Build & verify
         run: mvn verify -DskipTests -q
