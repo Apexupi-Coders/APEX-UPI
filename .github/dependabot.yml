@@ -1,0 +1,56 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  # Maintain dependencies for Maven projects (Java)
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/audit-service"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/ledger-service"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/npci-adapter"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/npci-response-consumer"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/psp-ledger-service"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/rules-validation-service"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/tpap-egress-service"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/tpap-ingress-service"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/services/psp-switch/transaction-orchestrator"
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Maintain Dockerfile dependencies
+  - package-ecosystem: "docker"
+    directory: "/services/psp-switch/audit-service"
+    schedule:
+      interval: "weekly"
