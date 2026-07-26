@@ -36,7 +36,7 @@ public class SwitchCompletedEventConsumer {
             } else {
                 log.warn("[KAFKA] Processing failed, will retry | key={} | attempt={}/{}",
                         record.key(), retryCount + 1, MAX_RETRY_ATTEMPTS, e);
-                ack.nack(1000);
+                ack.nack(java.time.Duration.ofMillis(1000));
             }
         }
     }
