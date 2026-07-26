@@ -128,7 +128,6 @@ public class ReconciliationService {
                     notificationService.notify(tid, context.getPa(), context.getAm(), "SUCCESS");
 
                     log.info("[RECONCILIATION] tid={} | RESOLVED → SUCCESS | ARN={}", tid, arn);
-                    resolved++;
 
                 } else {
                     // ——— NPCI confirms FAILED ———
@@ -142,7 +141,6 @@ public class ReconciliationService {
 
                     log.info("[RECONCILIATION] tid={} | RESOLVED → FAILED | responseCode={}",
                             tid, npciResponse.getResponseCode());
-                    resolved++;
                 }
 
         } catch (Exception e) {
