@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: surefire-reports-npci-adapter
           path: services/psp-switch/npci-adapter/target/surefire-reports/

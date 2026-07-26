@@ -44,7 +44,7 @@ jobs:
         run: mvn test -Dspring.profiles.active=test || true
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: surefire-reports-bank-ledger
           path: services/banking-switch/bank-ledger-service/target/surefire-reports/
@@ -65,7 +65,7 @@ jobs:
         run: mvn test -Dspring.profiles.active=test || true
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: surefire-reports-cbs-adapter
           path: services/banking-switch/cbs-adapter/target/surefire-reports/
@@ -86,7 +86,7 @@ jobs:
         run: mvn test -Dspring.profiles.active=test || true
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: surefire-reports-npci-request-listener
           path: services/banking-switch/npci-request-listener/target/surefire-reports/
@@ -107,7 +107,7 @@ jobs:
         run: mvn test -Dspring.profiles.active=test || true
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: surefire-reports-npci-response-adapter
           path: services/banking-switch/npci-response-adapter/target/surefire-reports/
