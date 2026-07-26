@@ -3,14 +3,18 @@ package com.pspswitch.tpapingress.service;
 import com.pspswitch.tpapingress.dto.request.BalanceInquiryRequest;
 import com.pspswitch.tpapingress.dto.request.PaymentInitiateRequest;
 import com.pspswitch.tpapingress.dto.request.VpaLookupRequest;
+import com.pspswitch.tpapingress.exception.KafkaPublishFailureException;
 import com.pspswitch.tpapingress.kafka.KafkaEventEnvelope;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Publishes validated events to the correct Kafka topic.
@@ -20,6 +24,8 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class KafkaPublisherService {
+
+    private static final long PUBLISH_TIMEOUT_SECONDS = 5;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -36,19 +42,19 @@ public class KafkaPublisherService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public boolean publishVpaLookup(VpaLookupRequest request) {
-        return publish(vpaLookupTopic, "VPA_LOOKUP_REQUESTED", request.getTxnId(), request);
+    public void publishVpaLookup(VpaLookupRequest request) {
+        publish(vpaLookupTopic, "VPA_LOOKUP_REQUESTED", request.getTxnId(), request);
     }
 
-    public boolean publishBalanceInquiry(BalanceInquiryRequest request) {
-        return publish(balanceInquiryTopic, "BALANCE_INQUIRY_REQUESTED", request.getTxnId(), request);
+    public void publishBalanceInquiry(BalanceInquiryRequest request) {
+        publish(balanceInquiryTopic, "BALANCE_INQUIRY_REQUESTED", request.getTxnId(), request);
     }
 
-    public boolean publishPaymentInitiate(PaymentInitiateRequest request) {
-        return publish(paymentInitiateTopic, "PAYMENT_INITIATE_REQUESTED", request.getTxnId(), request);
+    public void publishPaymentInitiate(PaymentInitiateRequest request) {
+        publish(paymentInitiateTopic, "PAYMENT_INITIATE_REQUESTED", request.getTxnId(), request);
     }
 
-    private boolean publish(String topic, String eventType, String txnId, Object data) {
+    private void publish(String topic, String eventType, String txnId, Object data) {
         KafkaEventEnvelope envelope = KafkaEventEnvelope.builder()
                 .eventId(UUID.randomUUID().toString())
                 .eventType(eventType)
@@ -60,19 +66,22 @@ public class KafkaPublisherService {
                 .data(data)
                 .build();
 
-        kafkaTemplate.send(topic, txnId, envelope)
-                .whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        log.error("[KAFKA-PUBLISHER] Publish FAILED | topic={} | txnId={} | error={}",
-                                topic, txnId, ex.getMessage(), ex);
-                    } else {
-                        log.info("[KAFKA-PUBLISHER] Published {} to topic={} | txnId={} | partition={} | offset={}",
-                                eventType, topic, txnId,
-                                result.getRecordMetadata().partition(),
-                                result.getRecordMetadata().offset());
-                    }
-                });
-        return true;
+        try {
+            CompletableFuture<SendResult<String, Object>> future =
+                    kafkaTemplate.send(topic, txnId, envelope);
+
+            SendResult<String, Object> result = future.get(PUBLISH_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+            log.info("[KAFKA-PUBLISHER] Published {} to topic={} | txnId={} | partition={} | offset={}",
+                    eventType, topic, txnId,
+                    result.getRecordMetadata().partition(),
+                    result.getRecordMetadata().offset());
+        } catch (Exception ex) {
+            log.error("[KAFKA-PUBLISHER] Publish FAILED | topic={} | txnId={} | error={}",
+                    topic, txnId, ex.getMessage(), ex);
+            throw new KafkaPublishFailureException(
+                    "Failed to publish " + eventType + " for txnId=" + txnId);
+        }
     }
 
     private String extractTpapId(String txnId) {
