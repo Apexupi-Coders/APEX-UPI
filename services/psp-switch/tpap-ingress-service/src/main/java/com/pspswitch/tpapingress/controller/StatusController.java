@@ -27,19 +27,11 @@ public class StatusController {
 
     private final IdempotencyRepository idempotencyRepository;
 
-    private static final String TXN_ID_PATTERN =
-            "^[a-zA-Z0-9]+-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
-
     @GetMapping("/status/{txnId}")
     public ResponseEntity<?> getStatus(@PathVariable String txnId,
                                        @RequestAttribute("tpapId") String tpapId) {
-        // Validate txnId format
-        if (!txnId.matches(TXN_ID_PATTERN)) {
-            throw new RequestValidationException("INVALID_TXN_ID_FORMAT",
-                    "txnId must be in format {tpapName}-{UUID}");
-        }
+        validateTxnId(txnId, tpapId);
 
-        // Look up by txnId
         Optional<IdempotencyRecord> record = idempotencyRepository.findByIdempotencyKey(
                 com.pspswitch.tpapingress.service.IdempotencyService.computeKey(tpapId, txnId));
 
